@@ -30,8 +30,12 @@
         </h1>
       </div>
 
-      <button v-if="!isStatic" class="blades-btn-ghost text-xs py-1.5" @click="openAdd(currentId)">
-        + {{ current ? 'Add Sub-location' : 'Add Location' }}
+      <button
+        v-if="!isStatic && current?.type !== 'site'"
+        class="blades-btn-ghost text-xs py-1.5"
+        @click="openAdd(currentId)"
+      >
+        + Add {{ current ? LOCATION_TYPE_LABELS[LOCATION_CHILD_TYPE[current.type]!] : 'Region' }}
       </button>
     </div>
 
@@ -48,8 +52,12 @@
           <p class="text-blades-muted font-mono text-sm">
             {{ current ? `${current.name} has no sub-locations yet.` : 'No locations defined yet.' }}
           </p>
-          <button v-if="!isStatic" class="blades-btn-outline text-xs mt-4" @click="openAdd(currentId)">
-            + Add {{ current ? 'sub-location' : 'first location' }}
+          <button
+            v-if="!isStatic && current?.type !== 'site'"
+            class="blades-btn-outline text-xs mt-4"
+            @click="openAdd(currentId)"
+          >
+            + Add {{ current ? LOCATION_TYPE_LABELS[LOCATION_CHILD_TYPE[current.type]!] : 'first Region' }}
           </button>
         </div>
 
@@ -152,16 +160,42 @@
               <p class="text-blades-muted font-mono text-xs leading-relaxed italic">{{ current.notes }}</p>
             </div>
 
-            <div v-if="!current.description && !current.notes && !current.tags?.length"
+            <div v-if="!current.description && !current.notes && !current.tags?.length && current.type !== 'site'"
                  class="text-blades-muted/50 font-mono text-xs italic text-center py-4">
               No details yet.
+            </div>
+
+            <!-- NPC list (sites only) -->
+            <div v-if="current.type === 'site'">
+              <div class="blades-label mb-2">NPCs Here</div>
+              <div v-if="siteNpcs.length === 0" class="text-blades-muted/50 font-mono text-xs italic py-2">
+                No NPCs assigned to this location.
+              </div>
+              <div v-else class="space-y-1">
+                <div
+                  v-for="npc in siteNpcs"
+                  :key="npc.id"
+                  class="flex items-center gap-2 px-2 py-1.5 rounded border border-blades-border bg-blades-card/30"
+                >
+                  <div class="flex-1 min-w-0">
+                    <div class="text-sm font-sans text-blades-text truncate">{{ npc.name }}</div>
+                    <div v-if="npc.alias" class="text-[10px] font-mono text-blades-muted/70 truncate">"{{ npc.alias }}"</div>
+                  </div>
+                  <span v-if="npc.role" class="blades-badge-muted text-[10px] flex-shrink-0">{{ npc.role }}</span>
+                </div>
+              </div>
             </div>
           </div>
 
           <!-- Actions -->
           <div v-if="!isStatic" class="flex-shrink-0 p-3 border-t border-blades-border flex gap-2">
             <button class="blades-btn-outline text-xs flex-1 py-1.5" @click="openDrawer(current!.id)">Edit</button>
-            <button class="blades-btn-ghost text-xs py-1.5 px-2" @click="openAdd(current!.id)" title="Add child">+</button>
+            <button
+              v-if="current!.type !== 'site'"
+              class="blades-btn-ghost text-xs py-1.5 px-2"
+              @click="openAdd(current!.id)"
+              :title="'Add ' + LOCATION_TYPE_LABELS[LOCATION_CHILD_TYPE[current!.type]!]"
+            >+</button>
             <button class="blades-btn-danger text-xs py-1.5 px-2" @click="del(current!.id)" title="Delete">✕</button>
           </div>
         </div>
@@ -184,11 +218,10 @@
             </div>
             <div>
               <label class="blades-label">Type</label>
-              <select v-model="form.type" class="blades-select">
-                <option v-for="t in LOCATION_TYPES" :key="t" :value="t">
-                  {{ TYPE_ICONS[t] }} {{ LOCATION_TYPE_LABELS[t] }}
-                </option>
-              </select>
+              <div class="blades-input flex items-center gap-2 text-blades-muted cursor-default select-none">
+                <span>{{ TYPE_ICONS[form.type as string] }}</span>
+                <span>{{ LOCATION_TYPE_LABELS[form.type as LocationType] }}</span>
+              </div>
             </div>
           </div>
           <div>
@@ -219,8 +252,9 @@
 import { ref, computed } from 'vue'
 import { useLocationsStore } from '@/stores/locations'
 import { useFactionsStore } from '@/stores/factions'
+import { useCharactersStore } from '@/stores/characters'
 import type { Location, LocationType } from '@/types/blades'
-import { LOCATION_TYPES, LOCATION_TYPE_LABELS } from '@/types/blades'
+import { LOCATION_TYPE_LABELS, LOCATION_CHILD_TYPE } from '@/types/blades'
 import BannerImage from '@/components/BannerImage.vue'
 import LocationDrawer from '@/components/LocationDrawer.vue'
 
@@ -229,6 +263,7 @@ const isStatic = __STATIC_MODE__
 
 const locStore = useLocationsStore()
 const facStore = useFactionsStore()
+const charStore = useCharactersStore()
 
 // ── Navigation ─────────────────────────────────────────────────────────────
 const currentId = ref<string | null>(null)
@@ -283,9 +318,15 @@ function generateBanner(loc: Location) {
 
 // ── Type icons ─────────────────────────────────────────────────────────────
 const TYPE_ICONS: Record<string, string> = {
-  world: '🌍', city: '🏙', district: '🏘', area: '📍',
-  site: '🏛', room: '🚪', other: '◆',
+  region: '🌏', city: '🏙', district: '🏘', site: '🏛',
 }
+
+// ── NPC list for sites ─────────────────────────────────────────────────────
+const siteNpcs = computed(() =>
+  current.value?.type === 'site'
+    ? charStore.characters.filter(c => c.isNpc && c.locationId === current.value!.id)
+    : []
+)
 
 // ── Drawer ──────────────────────────────────────────────────────────────────
 const drawerOpen = ref(false)
@@ -311,7 +352,11 @@ const form = ref<Partial<Location>>({})
 
 function openAdd(parentId: string | null) {
   addParentId.value = parentId
-  form.value = { name: '', type: 'district', description: '' }
+  const parentType = parentId ? locStore.get(parentId)?.type ?? null : null
+  const childType: LocationType = parentType
+    ? (LOCATION_CHILD_TYPE[parentType] ?? 'site')
+    : 'region'
+  form.value = { name: '', type: childType, description: '' }
   showForm.value = true
 }
 

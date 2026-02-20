@@ -139,7 +139,11 @@
           </template>
           <template v-else-if="!isStatic">
             <button class="blades-btn-outline text-xs" @click="startEdit">Edit</button>
-            <button class="blades-btn-ghost text-xs" @click="$emit('add-child', loc.id)">+ Add Child</button>
+            <button
+              v-if="loc.type !== 'site'"
+              class="blades-btn-ghost text-xs"
+              @click="$emit('add-child', loc.id)"
+            >+ Add Child</button>
           </template>
         </div>
         <button v-if="!isStatic" class="blades-btn-danger text-xs" @click="deleteLocation">Delete</button>
@@ -154,12 +158,11 @@ import Drawer from './Drawer.vue'
 import BannerImage from './BannerImage.vue'
 import { useLocationsStore } from '@/stores/locations'
 import { useFactionsStore } from '@/stores/factions'
-import { LOCATION_TYPE_LABELS } from '@/types/blades'
+import { LOCATION_TYPES, LOCATION_TYPE_LABELS } from '@/types/blades'
 import type { Location, LocationType } from '@/types/blades'
 
-const LOCATION_TYPES: LocationType[] = ['world', 'city', 'district', 'area', 'site', 'room', 'other']
 const TYPE_ICONS: Record<string, string> = {
-  world: '🌍', city: '🏙', district: '🏘', area: '📍', site: '🏛', room: '🚪', other: '◆',
+  region: '🌏', city: '🏙', district: '🏘', site: '🏛',
 }
 
 const props = defineProps<{ open: boolean; locationId: string | null }>()

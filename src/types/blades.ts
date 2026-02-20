@@ -175,26 +175,28 @@ export interface CrewType {
 // ── Locations ─────────────────────────────────────────────────────────────────
 
 export type LocationType =
-  | 'world'
+  | 'region'
   | 'city'
   | 'district'
-  | 'area'
   | 'site'
-  | 'room'
-  | 'other'
 
 export const LOCATION_TYPES: LocationType[] = [
-  'world', 'city', 'district', 'area', 'site', 'room', 'other',
+  'region', 'city', 'district', 'site',
 ]
 
 export const LOCATION_TYPE_LABELS: Record<LocationType, string> = {
-  world: 'World',
-  city: 'City',
+  region:   'Region',
+  city:     'City',
   district: 'District',
-  area: 'Area',
-  site: 'Site / Building',
-  room: 'Room / Space',
-  other: 'Other',
+  site:     'Site / Building',
+}
+
+/** The single valid child type for each tier, or null for leaf nodes. */
+export const LOCATION_CHILD_TYPE: Record<LocationType, LocationType | null> = {
+  region:   'city',
+  city:     'district',
+  district: 'site',
+  site:     null,
 }
 
 export interface Location {

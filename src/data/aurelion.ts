@@ -40,7 +40,7 @@ export function buildAurelionLocations(): Location[] {
   return [
     // ── World root ──────────────────────────────────────────────────────────
     {
-      id: LOC.world, name: 'Aurelion', type: 'world', parentId: null,
+      id: LOC.world, name: 'Aurelion', type: 'region', parentId: null,
       description: 'The former capital of a slain Demon Lord. Centuries ago a hero\'s party defeated the Demon King and liberated the land — then failed to build a stable peace. The land beyond the walls is blighted and unlivable. Aurelion survives not because it is healthy, but because it isolates its failures.',
       tags: ['demon-king-legacy', 'isolated', 'blighted-wastes', 'hero-party-aftermath'],
       notes: 'Height = legitimacy and safety. Movement between tiers is frictional. Old Nexus lies beneath everything.',
@@ -58,25 +58,25 @@ export function buildAurelionLocations(): Location[] {
 
     // ── Tier groupings ────────────────────────────────────────────────────
     {
-      id: LOC.upper, name: 'Upper City', type: 'area', parentId: LOC.city,
+      id: LOC.upper, name: 'Upper City', type: 'district', parentId: LOC.city,
       description: 'Legitimacy, ideology, memory. The upper reaches of Aurelion where authority is performed and history is curated. Height equals safety here.',
       tags: ['upper-tier', 'legitimate', 'ideological'],
       createdAt: now, updatedAt: now,
     },
     {
-      id: LOC.mid, name: 'Mid City', type: 'area', parentId: LOC.city,
+      id: LOC.mid, name: 'Mid City', type: 'district', parentId: LOC.city,
       description: 'Control, infrastructure, necessity. Where the law lives, magic is licensed, goods move, and labor is organized. The machinery of the city.',
       tags: ['mid-tier', 'infrastructure', 'control'],
       createdAt: now, updatedAt: now,
     },
     {
-      id: LOC.lower, name: 'Lower City', type: 'area', parentId: LOC.city,
+      id: LOC.lower, name: 'Lower City', type: 'district', parentId: LOC.city,
       description: 'Survival, crime, adaptation. Not "poor districts" — different survival mechanisms, each absorbing a different kind of pressure the city cannot resolve.',
       tags: ['lower-tier', 'survival', 'crime', 'adaptation'],
       createdAt: now, updatedAt: now,
     },
     {
-      id: LOC.under, name: 'Undercity', type: 'area', parentId: LOC.city,
+      id: LOC.under, name: 'Undercity', type: 'district', parentId: LOC.city,
       description: 'The buried remnants of the Demon King\'s power. Old, sealed, not resolved. Those who go below often do not return the same.',
       tags: ['undercity', 'sealed', 'demonic', 'dangerous'],
       createdAt: now, updatedAt: now,
@@ -84,27 +84,27 @@ export function buildAurelionLocations(): Location[] {
 
     // ── UPPER CITY DISTRICTS ──────────────────────────────────────────────
     {
-      id: LOC.crownrise, name: 'Crownrise', type: 'district', parentId: LOC.upper,
+      id: LOC.crownrise, name: 'Crownrise', type: 'site', parentId: LOC.upper,
       description: 'Ceremonial power and public spectacle. Authority as theater. Parades, proclamations, and monuments to the Hero\'s party fill wide boulevards. Legitimacy is performed here daily.',
       tags: ['ceremony', 'spectacle', 'monuments', 'theater-of-power'],
       controlledBy: 'aur_fac_ruling',
       createdAt: now, updatedAt: now,
     },
     {
-      id: LOC.sanctum, name: 'High Sanctum', type: 'district', parentId: LOC.upper,
+      id: LOC.sanctum, name: 'High Sanctum', type: 'site', parentId: LOC.upper,
       description: 'Faith, charity, demon-hunting, and moral oversight. The Church founded by the original Cleric. Grand cathedral, healing wards, and the Order of the Pale Seal — the city\'s sanctioned demon-hunters.',
       tags: ['church', 'faith', 'demon-hunters', 'charity', 'moral-oversight'],
       controlledBy: 'aur_fac_sanctum',
       createdAt: now, updatedAt: now,
     },
     {
-      id: LOC.stonefall, name: 'Stonefall', type: 'district', parentId: LOC.upper,
+      id: LOC.stonefall, name: 'Stonefall', type: 'site', parentId: LOC.upper,
       description: 'Decaying noble estates and the abandoned prison. Old power rots here. Ancient families cling to titles that carry less weight each decade. The prison has been sealed for thirty years.',
       tags: ['nobles', 'decay', 'old-money', 'abandoned-prison'],
       createdAt: now, updatedAt: now,
     },
     {
-      id: LOC.archivum, name: 'Archivum', type: 'district', parentId: LOC.upper,
+      id: LOC.archivum, name: 'Archivum', type: 'site', parentId: LOC.upper,
       description: 'Records, identity, erasure. Reality is defined on paper here. The Archivum controls who exists legally in Aurelion — birth records, property deeds, licenses, and the quiet power to unmake a person by altering a ledger.',
       tags: ['records', 'identity', 'bureaucracy', 'erasure', 'paper-power'],
       controlledBy: 'aur_fac_archivum',
@@ -113,28 +113,28 @@ export function buildAurelionLocations(): Location[] {
 
     // ── MID CITY DISTRICTS ─────────────────────────────────────────────────
     {
-      id: LOC.wardspire, name: 'Wardspire', type: 'district', parentId: LOC.mid,
+      id: LOC.wardspire, name: 'Wardspire', type: 'site', parentId: LOC.mid,
       description: 'Courts, Bluecoat HQ, central prison. Law made concrete. The Wardspire enforces law across all tiers, though its presence thins in the Lower City and disappears entirely in the Drownways.',
       tags: ['law', 'bluecoats', 'courts', 'prison', 'enforcement'],
       controlledBy: 'aur_fac_wardspire',
       createdAt: now, updatedAt: now,
     },
     {
-      id: LOC.runeward, name: 'Runeward', type: 'district', parentId: LOC.mid,
+      id: LOC.runeward, name: 'Runeward', type: 'site', parentId: LOC.mid,
       description: 'Licensed magic, ward engines, inspections. The institution founded by the original Mage. Magic is infrastructure here — not wonder. Unlicensed casting is illegal; inspectors patrol ward maintenance across the city.',
       tags: ['magic', 'licensed', 'ward-engines', 'inspections', 'regulated'],
       controlledBy: 'aur_fac_runeward',
       createdAt: now, updatedAt: now,
     },
     {
-      id: LOC.ironline, name: 'Ironline', type: 'district', parentId: LOC.mid,
+      id: LOC.ironline, name: 'Ironline', type: 'site', parentId: LOC.mid,
       description: 'Rail hub connecting Aurelion to the two other surviving cities. Movement is privilege. The warded rail lines pass through blighted wastes, making rail travel the only safe way out. Ironline controls that movement.',
       tags: ['rail', 'transit', 'warded', 'movement', 'privilege'],
       controlledBy: 'aur_fac_ironline',
       createdAt: now, updatedAt: now,
     },
     {
-      id: LOC.guildreach, name: 'Guildreach', type: 'district', parentId: LOC.mid,
+      id: LOC.guildreach, name: 'Guildreach', type: 'site', parentId: LOC.mid,
       description: 'Industry, labor contracts, and controlled production. Where goods are made and labor is formally organized — and exploited. The Guilds set wages, working hours, and which trades are permitted in each district.',
       tags: ['industry', 'guilds', 'labor', 'production', 'exploitation'],
       controlledBy: 'aur_fac_guildreach',
@@ -143,31 +143,31 @@ export function buildAurelionLocations(): Location[] {
 
     // ── LOWER CITY DISTRICTS ───────────────────────────────────────────────
     {
-      id: LOC.lowlanterns, name: 'Low Lanterns', type: 'district', parentId: LOC.lower,
+      id: LOC.lowlanterns, name: 'Low Lanterns', type: 'site', parentId: LOC.lower,
       description: 'Pub district. Crews, street justice, social violence. The city\'s pressure-release valve for organized violence. Rival crews negotiate territory here. The Bluecoats make arrests when convenient, ignore problems when paid.',
       tags: ['pubs', 'crews', 'street-violence', 'pressure-release', 'informal-justice'],
       createdAt: now, updatedAt: now,
     },
     {
-      id: LOC.nightmarket, name: 'Night Market', type: 'district', parentId: LOC.lower,
+      id: LOC.nightmarket, name: 'Night Market', type: 'site', parentId: LOC.lower,
       description: 'Dense enclave. Gambling, family networks, pop-up stalls, folk healing, quiet crime. The city\'s unofficial commerce. Illicit goods move here. Family connections count for more than coin. Unlicensed magic is tolerated.',
       tags: ['market', 'gambling', 'folk-healing', 'unlicensed-magic', 'family-networks', 'illicit'],
       createdAt: now, updatedAt: now,
     },
     {
-      id: LOC.stacks, name: 'The Stacks', type: 'district', parentId: LOC.lower,
+      id: LOC.stacks, name: 'The Stacks', type: 'site', parentId: LOC.lower,
       description: 'Vertical overcrowding. Labor reservoir. Elvish refugees in upper levels tend rooftop gardens and hold long memory and quiet resentment. The Stacks absorbs excess population the city cannot place elsewhere.',
       tags: ['overcrowding', 'labor', 'elvish-refugees', 'rooftop-gardens', 'vertical'],
       createdAt: now, updatedAt: now,
     },
     {
-      id: LOC.drownways, name: 'Drownways', type: 'district', parentId: LOC.lower,
+      id: LOC.drownways, name: 'Drownways', type: 'site', parentId: LOC.lower,
       description: 'Flooded low district. Canals, smuggling routes, waste transport. The city\'s waste and secrets flow through here. Canal networks connect to below-street passages. The Bluecoats rarely enter without reason.',
       tags: ['flooded', 'canals', 'smuggling', 'waste', 'secrecy'],
       createdAt: now, updatedAt: now,
     },
     {
-      id: LOC.ashfall, name: 'Ashfall', type: 'district', parentId: LOC.lower,
+      id: LOC.ashfall, name: 'Ashfall', type: 'site', parentId: LOC.lower,
       description: 'Blight containment. Quarantine, failing wards, quiet suffering. Where the demon-king\'s corruption still seeps through. Church wardens maintain failing wards. Residents cannot leave without a health writ. The city\'s supernatural failure, contained.',
       tags: ['blight', 'quarantine', 'failing-wards', 'corruption', 'suffering', 'containment'],
       controlledBy: 'aur_fac_sanctum',
@@ -176,7 +176,7 @@ export function buildAurelionLocations(): Location[] {
 
     // ── UNDERCITY ──────────────────────────────────────────────────────────
     {
-      id: LOC.oldnexus, name: 'Old Nexus', type: 'district', parentId: LOC.under,
+      id: LOC.oldnexus, name: 'Old Nexus', type: 'site', parentId: LOC.under,
       description: 'The buried heart of the Demon King\'s power. Sealed. Not resolved. Runeward\'s deepest wards hold here — barely. Treasure hunters, cultists, and the desperate venture below. Most don\'t come back unchanged.',
       tags: ['demon-king', 'sealed', 'nexus', 'dangerous', 'corruption', 'ruins'],
       createdAt: now, updatedAt: now,
