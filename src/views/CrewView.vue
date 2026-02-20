@@ -9,6 +9,15 @@
     </div>
 
     <template v-else>
+      <!-- Banner -->
+      <BannerImage
+        :model-value="crew.bannerImage"
+        :subject="crew.name + ' crew in Aurelion'"
+        :description="crew.notes"
+        :height="180"
+        @update:model-value="crewStore.update({ bannerImage: $event })"
+      />
+
       <!-- Header -->
       <div class="blades-card p-5 mb-5">
         <div class="flex items-start justify-between flex-wrap gap-4">
@@ -279,6 +288,7 @@ import { useCrewStore } from '@/stores/crew'
 import { useLocationsStore } from '@/stores/locations'
 import { CREW_TYPES } from '@/data/crew_types'
 import ClockWidget from '@/components/ClockWidget.vue'
+import BannerImage from '@/components/BannerImage.vue'
 import type { ClockSegments } from '@/types/blades'
 
 declare const __STATIC_MODE__: boolean
