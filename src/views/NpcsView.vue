@@ -3,27 +3,65 @@
     <div class="flex items-center justify-between mb-6 flex-wrap gap-4">
       <div>
         <h1 class="text-3xl text-blades-text glow-amber">NPCs</h1>
-        <p class="text-blades-muted font-mono text-sm mt-1">{{ npcs.length }} character{{ npcs.length !== 1 ? 's' : '' }} in the world</p>
+        <p class="text-blades-muted font-mono text-sm mt-1">
+          {{ filteredNpcs.length }}<template v-if="filteredNpcs.length !== allNpcs.length"> of {{ allNpcs.length }}</template>
+          character{{ allNpcs.length !== 1 ? 's' : '' }}
+        </p>
       </div>
       <button v-if="!isStatic" class="blades-btn-gold" @click="createNpc">+ New NPC</button>
     </div>
 
-    <div v-if="npcs.length === 0" class="text-center py-24">
+    <!-- Filters -->
+    <div class="flex flex-wrap gap-3 mb-6">
+      <input
+        v-model="search"
+        class="blades-input max-w-xs"
+        placeholder="Search by name, alias, role…"
+      />
+      <select v-model="factionFilter" class="blades-select max-w-[200px]">
+        <option value="">All Factions</option>
+        <option
+          v-for="f in facStore.factions"
+          :key="f.id"
+          :value="f.id"
+        >{{ f.name }}</option>
+      </select>
+      <button
+        v-if="search || factionFilter"
+        class="blades-btn-ghost text-xs"
+        @click="search = ''; factionFilter = ''"
+      >Clear</button>
+    </div>
+
+    <div v-if="allNpcs.length === 0" class="text-center py-24">
       <div class="text-6xl mb-4 opacity-10 font-serif">◈</div>
       <p class="text-blades-muted font-mono text-sm mb-4">No NPCs yet.</p>
       <button v-if="!isStatic" class="blades-btn-outline" @click="createNpc">Add a World Character</button>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+    <div v-else-if="filteredNpcs.length === 0" class="text-center py-24">
+      <div class="text-6xl mb-4 opacity-10 font-serif">◈</div>
+      <p class="text-blades-muted font-mono text-sm">No NPCs match your search.</p>
+    </div>
+
+    <div v-else class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
       <div
-        v-for="ch in npcs"
+        v-for="ch in filteredNpcs"
         :key="ch.id"
         class="blades-card hover:border-blades-border-light transition-colors cursor-pointer group overflow-hidden"
         @click="openDrawer(ch.id)"
       >
-        <!-- Banner thumbnail -->
-        <div v-if="ch.bannerImage" class="h-28 overflow-hidden">
-          <img :src="ch.bannerImage" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" :alt="ch.name" />
+        <!-- Square portrait thumbnail -->
+        <div class="aspect-square overflow-hidden bg-blades-card/40">
+          <img
+            v-if="ch.bannerImage"
+            :src="ch.bannerImage"
+            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            :alt="ch.name"
+          />
+          <div v-else class="w-full h-full flex items-center justify-center">
+            <span class="text-5xl opacity-[0.06] select-none font-serif">◈</span>
+          </div>
         </div>
 
         <div class="p-4">
@@ -71,7 +109,23 @@ const isStatic = __STATIC_MODE__
 const store = useCharactersStore()
 const facStore = useFactionsStore()
 
-const npcs = computed(() => store.characters.filter(c => c.isNpc === true))
+const search = ref('')
+const factionFilter = ref('')
+
+const allNpcs = computed(() => store.characters.filter(c => c.isNpc === true))
+
+const filteredNpcs = computed(() => {
+  const q = search.value.toLowerCase().trim()
+  return allNpcs.value.filter(c => {
+    const matchesSearch = !q
+      || c.name.toLowerCase().includes(q)
+      || c.alias?.toLowerCase().includes(q)
+      || c.role?.toLowerCase().includes(q)
+      || c.description?.toLowerCase().includes(q)
+    const matchesFaction = !factionFilter.value || c.factionId === factionFilter.value
+    return matchesSearch && matchesFaction
+  })
+})
 
 const drawerOpen = ref(false)
 const selectedId = ref<string | null>(null)

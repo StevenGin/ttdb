@@ -22,7 +22,7 @@
           :model-value="faction.bannerImage"
           :subject="faction.name + ' faction in Aurelion'"
           :description="faction.description"
-          :height="180"
+          :square="true"
           @update:model-value="store.update(faction.id, { bannerImage: $event })"
         />
       </div>

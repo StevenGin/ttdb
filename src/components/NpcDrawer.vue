@@ -19,7 +19,7 @@
         :model-value="npc.bannerImage"
         :subject="npc.name + (npc.role ? ', ' + npc.role : '') + ' in Aurelion'"
         :description="npc.description || npc.notes"
-        :height="220"
+        :square="true"
         @update:model-value="save({ bannerImage: $event })"
       />
 

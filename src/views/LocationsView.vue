@@ -205,7 +205,7 @@
               :model-value="current.bannerImage"
               :subject="`${current.name}, ${LOCATION_TYPE_LABELS[current.type]} in Aurelion`"
               :description="current.description"
-              :height="160"
+              :square="true"
               @update:model-value="locStore.update(current!.id, { bannerImage: $event })"
             />
 
