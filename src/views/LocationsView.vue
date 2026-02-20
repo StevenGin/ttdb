@@ -39,167 +39,218 @@
       </button>
     </div>
 
-    <!-- Main body: grid (left) + info panel (right) -->
+    <!-- Main body -->
     <div class="flex flex-1 overflow-hidden">
 
-      <!-- Grid -->
-      <div class="flex-1 overflow-y-auto p-6">
-        <!-- Empty -->
-        <div v-if="gridItems.length === 0" class="flex flex-col items-center justify-center h-full py-12 text-center">
-          <div class="text-6xl mb-4 opacity-10 select-none">
-            {{ current ? TYPE_ICONS[current.type] : '🌍' }}
-          </div>
-          <p class="text-blades-muted font-mono text-sm">
-            {{ current ? `${current.name} has no sub-locations yet.` : 'No locations defined yet.' }}
-          </p>
-          <button
-            v-if="!isStatic && current?.type !== 'site'"
-            class="blades-btn-outline text-xs mt-4"
-            @click="openAdd(currentId)"
-          >
-            + Add {{ current ? LOCATION_TYPE_LABELS[LOCATION_CHILD_TYPE[current.type]!] : 'first Region' }}
-          </button>
-        </div>
-
-        <!-- Card grid -->
-        <div v-else class="grid gap-4" :class="gridCols">
-          <button
-            v-for="loc in gridItems"
-            :key="loc.id"
-            class="location-card group text-left"
-            @click="navigate(loc.id)"
-          >
-            <div class="aspect-square w-full overflow-hidden rounded relative bg-blades-card">
-              <!-- Banner image -->
-              <img
-                v-if="loc.bannerImage"
-                :src="loc.bannerImage"
-                :alt="loc.name"
-                class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-              />
-              <!-- Placeholder -->
-              <div v-else class="w-full h-full flex items-center justify-center">
-                <span class="text-5xl opacity-[0.08] select-none">{{ TYPE_ICONS[loc.type] }}</span>
-              </div>
-
-              <!-- Dark gradient overlay -->
-              <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent" />
-
-              <!-- Child count -->
-              <div
-                v-if="childCount(loc.id) > 0"
-                class="absolute top-2 right-2 bg-black/55 backdrop-blur-sm text-[10px] font-mono
-                       text-blades-muted/90 px-1.5 py-0.5 rounded"
-              >{{ childCount(loc.id) }} ›</div>
-
-              <!-- ✦ AI badge (no image) -->
-              <button
-                v-if="!isStatic && !loc.bannerImage"
-                class="absolute top-2 left-2 bg-black/55 backdrop-blur-sm text-[10px] font-mono
-                       text-amber-400 border border-amber-800/60 px-1.5 py-0.5 rounded
-                       opacity-0 group-hover:opacity-100 transition-opacity hover:bg-amber-900/40"
-                @click.stop="generateBanner(loc)"
-              >✦ AI</button>
-
-              <!-- Name + type -->
-              <div class="absolute bottom-0 left-0 right-0 p-3">
-                <div class="text-white font-serif font-semibold text-sm leading-tight drop-shadow-lg">
-                  {{ loc.name }}
-                </div>
-                <div class="text-white/55 font-mono text-[10px] mt-0.5 flex items-center gap-2">
-                  <span>{{ LOCATION_TYPE_LABELS[loc.type] }}</span>
-                  <span v-if="factionMap[loc.controlledBy ?? '']" class="text-amber-400/70">
-                    ⚑ {{ factionMap[loc.controlledBy!] }}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </button>
-        </div>
-      </div>
-
-      <!-- Right info panel (shown when drilled into a location) -->
-      <Transition name="slide-info">
-        <div
-          v-if="current"
-          class="w-72 xl:w-80 flex-shrink-0 border-l border-blades-border overflow-y-auto flex flex-col bg-blades-surface"
-        >
+      <!-- ── SITE DETAIL VIEW (full-width) ───────────────────────────────── -->
+      <template v-if="current?.type === 'site'">
+        <div class="flex-1 overflow-y-auto">
           <!-- Banner -->
           <BannerImage
             :model-value="current.bannerImage"
-            :subject="`${current.name}, ${LOCATION_TYPE_LABELS[current.type]} in Aurelion`"
+            :subject="`${current.name}, district in Aurelion`"
             :description="current.description"
-            :height="160"
-            @update:model-value="locStore.update(current!.id, { bannerImage: $event })"
+            :height="260"
+            @update:model-value="locStore.update(current.id, { bannerImage: $event })"
           />
 
-          <div class="p-4 space-y-4 flex-1 overflow-y-auto">
-            <!-- Badges -->
-            <div class="flex flex-wrap gap-1.5">
-              <span class="blades-badge-muted text-xs">{{ LOCATION_TYPE_LABELS[current.type] }}</span>
-              <span v-if="controllingFaction" class="blades-badge-muted text-xs">⚑ {{ controllingFaction.name }}</span>
-            </div>
+          <div class="p-6 max-w-5xl">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-            <!-- Tags -->
-            <div v-if="current.tags?.length" class="flex flex-wrap gap-1">
-              <span
-                v-for="tag in current.tags" :key="tag"
-                class="blades-badge text-[10px] border-blades-border text-blades-muted/70"
-              >{{ tag }}</span>
-            </div>
+              <!-- Left: description + tags + notes -->
+              <div class="lg:col-span-2 space-y-5">
+                <!-- Badges row -->
+                <div class="flex flex-wrap gap-2">
+                  <span class="blades-badge-muted text-xs">🏛 Site</span>
+                  <span v-if="controllingFaction" class="blades-badge-muted text-xs">⚑ {{ controllingFaction.name }}</span>
+                  <span
+                    v-for="tag in current.tags" :key="tag"
+                    class="blades-badge text-[10px] border-blades-border text-blades-muted/70"
+                  >{{ tag }}</span>
+                </div>
 
-            <!-- Description -->
-            <div v-if="current.description">
-              <div class="blades-label">Description</div>
-              <p class="text-blades-text/90 font-sans text-xs leading-relaxed">{{ current.description }}</p>
-            </div>
+                <div v-if="current.description">
+                  <div class="blades-label">Description</div>
+                  <p class="text-blades-text font-sans text-sm leading-relaxed whitespace-pre-wrap">{{ current.description }}</p>
+                </div>
 
-            <!-- Notes -->
-            <div v-if="current.notes">
-              <div class="blades-label">Notes</div>
-              <p class="text-blades-muted font-mono text-xs leading-relaxed italic">{{ current.notes }}</p>
-            </div>
+                <div v-if="current.notes">
+                  <div class="blades-label">Notes</div>
+                  <p class="text-blades-muted font-mono text-sm leading-relaxed italic whitespace-pre-wrap">{{ current.notes }}</p>
+                </div>
 
-            <div v-if="!current.description && !current.notes && !current.tags?.length && current.type !== 'site'"
-                 class="text-blades-muted/50 font-mono text-xs italic text-center py-4">
-              No details yet.
-            </div>
-
-            <!-- NPC list (sites only) -->
-            <div v-if="current.type === 'site'">
-              <div class="blades-label mb-2">NPCs Here</div>
-              <div v-if="siteNpcs.length === 0" class="text-blades-muted/50 font-mono text-xs italic py-2">
-                No NPCs assigned to this location.
-              </div>
-              <div v-else class="space-y-1">
                 <div
-                  v-for="npc in siteNpcs"
-                  :key="npc.id"
-                  class="flex items-center gap-2 px-2 py-1.5 rounded border border-blades-border bg-blades-card/30"
-                >
-                  <div class="flex-1 min-w-0">
-                    <div class="text-sm font-sans text-blades-text truncate">{{ npc.name }}</div>
-                    <div v-if="npc.alias" class="text-[10px] font-mono text-blades-muted/70 truncate">"{{ npc.alias }}"</div>
+                  v-if="!current.description && !current.notes && !current.tags?.length"
+                  class="text-blades-muted/40 font-mono text-xs italic py-6"
+                >No details yet. Click Edit to add information.</div>
+              </div>
+
+              <!-- Right: NPCs + actions -->
+              <div class="space-y-4">
+                <div>
+                  <div class="blades-label mb-2">NPCs Here</div>
+                  <div v-if="siteNpcs.length === 0" class="blades-card p-4 text-center">
+                    <p class="text-blades-muted/50 font-mono text-xs italic">No NPCs assigned here.</p>
+                    <p class="text-blades-muted/40 font-mono text-[10px] mt-1">Assign NPCs via the NPC drawer → Location field.</p>
                   </div>
-                  <span v-if="npc.role" class="blades-badge-muted text-[10px] flex-shrink-0">{{ npc.role }}</span>
+                  <div v-else class="space-y-1.5">
+                    <div
+                      v-for="npc in siteNpcs"
+                      :key="npc.id"
+                      class="blades-card p-3 flex items-center gap-2"
+                    >
+                      <div class="flex-1 min-w-0">
+                        <div class="text-sm font-sans text-blades-text truncate">{{ npc.name }}</div>
+                        <div v-if="npc.alias" class="text-[10px] font-mono text-blades-muted/70 truncate">"{{ npc.alias }}"</div>
+                      </div>
+                      <span v-if="npc.role" class="blades-badge-muted text-[10px] flex-shrink-0">{{ npc.role }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div v-if="!isStatic" class="flex gap-2 pt-1">
+                  <button class="blades-btn-outline text-xs flex-1 py-1.5" @click="openDrawer(current!.id)">Edit Site</button>
+                  <button class="blades-btn-danger text-xs py-1.5 px-3" @click="del(current!.id)" title="Delete">✕</button>
                 </div>
               </div>
             </div>
           </div>
+        </div>
+      </template>
 
-          <!-- Actions -->
-          <div v-if="!isStatic" class="flex-shrink-0 p-3 border-t border-blades-border flex gap-2">
-            <button class="blades-btn-outline text-xs flex-1 py-1.5" @click="openDrawer(current!.id)">Edit</button>
+      <!-- ── GRID + INFO PANEL (region / city / district) ────────────────── -->
+      <template v-else>
+        <!-- Grid -->
+        <div class="flex-1 overflow-y-auto p-6">
+          <!-- Empty state -->
+          <div v-if="gridItems.length === 0" class="flex flex-col items-center justify-center h-full py-12 text-center">
+            <div class="text-6xl mb-4 opacity-10 select-none">
+              {{ current ? TYPE_ICONS[current.type] : '🌍' }}
+            </div>
+            <p class="text-blades-muted font-mono text-sm">
+              {{ current ? `${current.name} has no sub-locations yet.` : 'No locations defined yet.' }}
+            </p>
             <button
-              v-if="current!.type !== 'site'"
-              class="blades-btn-ghost text-xs py-1.5 px-2"
-              @click="openAdd(current!.id)"
-              :title="'Add ' + LOCATION_TYPE_LABELS[LOCATION_CHILD_TYPE[current!.type]!]"
-            >+</button>
-            <button class="blades-btn-danger text-xs py-1.5 px-2" @click="del(current!.id)" title="Delete">✕</button>
+              v-if="!isStatic"
+              class="blades-btn-outline text-xs mt-4"
+              @click="openAdd(currentId)"
+            >
+              + Add {{ current ? LOCATION_TYPE_LABELS[LOCATION_CHILD_TYPE[current.type]!] : 'first Region' }}
+            </button>
+          </div>
+
+          <!-- Card grid -->
+          <div v-else class="grid gap-4" :class="gridCols">
+            <button
+              v-for="loc in gridItems"
+              :key="loc.id"
+              class="location-card group text-left"
+              @click="navigate(loc.id)"
+            >
+              <div class="aspect-square w-full overflow-hidden rounded relative bg-blades-card">
+                <!-- Banner image -->
+                <img
+                  v-if="loc.bannerImage"
+                  :src="loc.bannerImage"
+                  :alt="loc.name"
+                  class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                />
+                <!-- Placeholder -->
+                <div v-else class="w-full h-full flex items-center justify-center">
+                  <span class="text-5xl opacity-[0.08] select-none">{{ TYPE_ICONS[loc.type] }}</span>
+                </div>
+
+                <!-- Dark gradient overlay -->
+                <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent" />
+
+                <!-- Child count -->
+                <div
+                  v-if="childCount(loc.id) > 0"
+                  class="absolute top-2 right-2 bg-black/55 backdrop-blur-sm text-[10px] font-mono
+                         text-blades-muted/90 px-1.5 py-0.5 rounded"
+                >{{ childCount(loc.id) }} ›</div>
+
+                <!-- ✦ AI badge -->
+                <button
+                  v-if="!isStatic && !loc.bannerImage"
+                  class="absolute top-2 left-2 bg-black/55 backdrop-blur-sm text-[10px] font-mono
+                         text-amber-400 border border-amber-800/60 px-1.5 py-0.5 rounded
+                         opacity-0 group-hover:opacity-100 transition-opacity hover:bg-amber-900/40"
+                  @click.stop="generateBanner(loc)"
+                >✦ AI</button>
+
+                <!-- Name + type -->
+                <div class="absolute bottom-0 left-0 right-0 p-3">
+                  <div class="text-white font-serif font-semibold text-sm leading-tight drop-shadow-lg">
+                    {{ loc.name }}
+                  </div>
+                  <div class="text-white/55 font-mono text-[10px] mt-0.5 flex items-center gap-2">
+                    <span>{{ LOCATION_TYPE_LABELS[loc.type] }}</span>
+                    <span v-if="factionMap[loc.controlledBy ?? '']" class="text-amber-400/70">
+                      ⚑ {{ factionMap[loc.controlledBy!] }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </button>
           </div>
         </div>
-      </Transition>
+
+        <!-- Right info panel -->
+        <Transition name="slide-info">
+          <div
+            v-if="current"
+            class="w-72 xl:w-80 flex-shrink-0 border-l border-blades-border overflow-y-auto flex flex-col bg-blades-surface"
+          >
+            <BannerImage
+              :model-value="current.bannerImage"
+              :subject="`${current.name}, ${LOCATION_TYPE_LABELS[current.type]} in Aurelion`"
+              :description="current.description"
+              :height="160"
+              @update:model-value="locStore.update(current!.id, { bannerImage: $event })"
+            />
+
+            <div class="p-4 space-y-4 flex-1 overflow-y-auto">
+              <div class="flex flex-wrap gap-1.5">
+                <span class="blades-badge-muted text-xs">{{ LOCATION_TYPE_LABELS[current.type] }}</span>
+                <span v-if="controllingFaction" class="blades-badge-muted text-xs">⚑ {{ controllingFaction.name }}</span>
+              </div>
+
+              <div v-if="current.tags?.length" class="flex flex-wrap gap-1">
+                <span
+                  v-for="tag in current.tags" :key="tag"
+                  class="blades-badge text-[10px] border-blades-border text-blades-muted/70"
+                >{{ tag }}</span>
+              </div>
+
+              <div v-if="current.description">
+                <div class="blades-label">Description</div>
+                <p class="text-blades-text/90 font-sans text-xs leading-relaxed">{{ current.description }}</p>
+              </div>
+
+              <div v-if="current.notes">
+                <div class="blades-label">Notes</div>
+                <p class="text-blades-muted font-mono text-xs leading-relaxed italic">{{ current.notes }}</p>
+              </div>
+
+              <div
+                v-if="!current.description && !current.notes && !current.tags?.length"
+                class="text-blades-muted/50 font-mono text-xs italic text-center py-4"
+              >No details yet.</div>
+            </div>
+
+            <div v-if="!isStatic" class="flex-shrink-0 p-3 border-t border-blades-border flex gap-2">
+              <button class="blades-btn-outline text-xs flex-1 py-1.5" @click="openDrawer(current!.id)">Edit</button>
+              <button
+                class="blades-btn-ghost text-xs py-1.5 px-2"
+                @click="openAdd(current!.id)"
+                :title="'Add ' + LOCATION_TYPE_LABELS[LOCATION_CHILD_TYPE[current!.type]!]"
+              >+</button>
+              <button class="blades-btn-danger text-xs py-1.5 px-2" @click="del(current!.id)" title="Delete">✕</button>
+            </div>
+          </div>
+        </Transition>
+      </template>
     </div>
 
     <!-- Create location modal -->
