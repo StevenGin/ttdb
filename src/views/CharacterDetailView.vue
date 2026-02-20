@@ -491,7 +491,7 @@ const ATTRIBUTES = [
 ] as const
 
 function attrRating(actions: readonly ActionName[]) {
-  return Math.max(...actions.map(a => ch.value!.actions[a] ?? 0))
+  return actions.filter(a => (ch.value!.actions[a] ?? 0) >= 1).length
 }
 
 function setAction(action: ActionName, dot: number) {

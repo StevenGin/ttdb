@@ -3,7 +3,8 @@
     <!-- Banner display -->
     <div
       class="banner-container w-full overflow-hidden rounded-sm border border-blades-border"
-      :style="{ height: height + 'px' }"
+      :class="square ? 'aspect-square' : ''"
+      :style="square ? {} : { height: height + 'px' }"
     >
       <img
         v-if="modelValue"
@@ -76,6 +77,7 @@ const props = defineProps<{
   subject?: string      // entity name for the AI prompt
   description?: string  // short description for richer prompt
   height?: number
+  square?: boolean      // use aspect-ratio:1 instead of fixed height
 }>()
 
 const emit = defineEmits<{
@@ -116,7 +118,8 @@ async function generateImage() {
     const encoded = encodeURIComponent(fullPrompt)
     // Pollinations AI — free, no API key required
     const seed = Math.floor(Math.random() * 9999)
-    const url = `https://image.pollinations.ai/prompt/${encoded}?width=1280&height=${height * 2}&nologo=true&seed=${seed}&model=flux`
+    const dims = props.square ? 'width=768&height=768' : `width=1280&height=${height * 2}`
+    const url = `https://image.pollinations.ai/prompt/${encoded}?${dims}&nologo=true&seed=${seed}&model=flux`
     // Prefetch to confirm it loaded then set
     const img = new Image()
     await new Promise<void>((resolve, reject) => {

@@ -44,74 +44,73 @@
 
       <!-- ── SITE DETAIL VIEW (full-width) ───────────────────────────────── -->
       <template v-if="current?.type === 'site'">
-        <div class="flex-1 overflow-y-auto">
-          <!-- Banner -->
-          <BannerImage
-            :model-value="current.bannerImage"
-            :subject="`${current.name}, district in Aurelion`"
-            :description="current.description"
-            :height="260"
-            @update:model-value="locStore.update(current.id, { bannerImage: $event })"
-          />
+        <div class="flex-1 overflow-y-auto p-6">
+          <div class="max-w-5xl grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-          <div class="p-6 max-w-5xl">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-              <!-- Left: description + tags + notes -->
-              <div class="lg:col-span-2 space-y-5">
-                <!-- Badges row -->
-                <div class="flex flex-wrap gap-2">
-                  <span class="blades-badge-muted text-xs">🏛 Site</span>
-                  <span v-if="controllingFaction" class="blades-badge-muted text-xs">⚑ {{ controllingFaction.name }}</span>
-                  <span
-                    v-for="tag in current.tags" :key="tag"
-                    class="blades-badge text-[10px] border-blades-border text-blades-muted/70"
-                  >{{ tag }}</span>
-                </div>
-
-                <div v-if="current.description">
-                  <div class="blades-label">Description</div>
-                  <p class="text-blades-text font-sans text-sm leading-relaxed whitespace-pre-wrap">{{ current.description }}</p>
-                </div>
-
-                <div v-if="current.notes">
-                  <div class="blades-label">Notes</div>
-                  <p class="text-blades-muted font-mono text-sm leading-relaxed italic whitespace-pre-wrap">{{ current.notes }}</p>
-                </div>
-
-                <div
-                  v-if="!current.description && !current.notes && !current.tags?.length"
-                  class="text-blades-muted/40 font-mono text-xs italic py-6"
-                >No details yet. Click Edit to add information.</div>
+            <!-- Left: description + tags + notes -->
+            <div class="lg:col-span-2 space-y-5">
+              <!-- Badges row -->
+              <div class="flex flex-wrap gap-2">
+                <span class="blades-badge-muted text-xs">🏛 Site</span>
+                <span v-if="controllingFaction" class="blades-badge-muted text-xs">⚑ {{ controllingFaction.name }}</span>
+                <span
+                  v-for="tag in current.tags" :key="tag"
+                  class="blades-badge text-[10px] border-blades-border text-blades-muted/70"
+                >{{ tag }}</span>
               </div>
 
-              <!-- Right: NPCs + actions -->
-              <div class="space-y-4">
-                <div>
-                  <div class="blades-label mb-2">NPCs Here</div>
-                  <div v-if="siteNpcs.length === 0" class="blades-card p-4 text-center">
-                    <p class="text-blades-muted/50 font-mono text-xs italic">No NPCs assigned here.</p>
-                    <p class="text-blades-muted/40 font-mono text-[10px] mt-1">Assign NPCs via the NPC drawer → Location field.</p>
-                  </div>
-                  <div v-else class="space-y-1.5">
-                    <div
-                      v-for="npc in siteNpcs"
-                      :key="npc.id"
-                      class="blades-card p-3 flex items-center gap-2"
-                    >
-                      <div class="flex-1 min-w-0">
-                        <div class="text-sm font-sans text-blades-text truncate">{{ npc.name }}</div>
-                        <div v-if="npc.alias" class="text-[10px] font-mono text-blades-muted/70 truncate">"{{ npc.alias }}"</div>
-                      </div>
-                      <span v-if="npc.role" class="blades-badge-muted text-[10px] flex-shrink-0">{{ npc.role }}</span>
-                    </div>
-                  </div>
-                </div>
+              <div v-if="current.description">
+                <div class="blades-label">Description</div>
+                <p class="text-blades-text font-sans text-sm leading-relaxed whitespace-pre-wrap">{{ current.description }}</p>
+              </div>
 
-                <div v-if="!isStatic" class="flex gap-2 pt-1">
-                  <button class="blades-btn-outline text-xs flex-1 py-1.5" @click="openDrawer(current!.id)">Edit Site</button>
-                  <button class="blades-btn-danger text-xs py-1.5 px-3" @click="del(current!.id)" title="Delete">✕</button>
+              <div v-if="current.notes">
+                <div class="blades-label">Notes</div>
+                <p class="text-blades-muted font-mono text-sm leading-relaxed italic whitespace-pre-wrap">{{ current.notes }}</p>
+              </div>
+
+              <div
+                v-if="!current.description && !current.notes && !current.tags?.length"
+                class="text-blades-muted/40 font-mono text-xs italic py-6"
+              >No details yet. Click Edit to add information.</div>
+            </div>
+
+            <!-- Right: square image + NPCs + actions -->
+            <div class="space-y-4">
+              <!-- Square image -->
+              <BannerImage
+                :model-value="current.bannerImage"
+                :subject="`${current.name}, a site in Aurelion`"
+                :description="current.description"
+                :square="true"
+                @update:model-value="locStore.update(current!.id, { bannerImage: $event })"
+              />
+
+              <!-- NPCs -->
+              <div>
+                <div class="blades-label mb-2">NPCs Here</div>
+                <div v-if="siteNpcs.length === 0" class="blades-card p-4 text-center">
+                  <p class="text-blades-muted/50 font-mono text-xs italic">No NPCs assigned here.</p>
+                  <p class="text-blades-muted/40 font-mono text-[10px] mt-1">Assign via NPC drawer → Location.</p>
                 </div>
+                <div v-else class="space-y-1.5">
+                  <div
+                    v-for="npc in siteNpcs"
+                    :key="npc.id"
+                    class="blades-card p-3 flex items-center gap-2"
+                  >
+                    <div class="flex-1 min-w-0">
+                      <div class="text-sm font-sans text-blades-text truncate">{{ npc.name }}</div>
+                      <div v-if="npc.alias" class="text-[10px] font-mono text-blades-muted/70 truncate">"{{ npc.alias }}"</div>
+                    </div>
+                    <span v-if="npc.role" class="blades-badge-muted text-[10px] flex-shrink-0">{{ npc.role }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div v-if="!isStatic" class="flex gap-2 pt-1">
+                <button class="blades-btn-outline text-xs flex-1 py-1.5" @click="openDrawer(current!.id)">Edit Site</button>
+                <button class="blades-btn-danger text-xs py-1.5 px-3" @click="del(current!.id)" title="Delete">✕</button>
               </div>
             </div>
           </div>
