@@ -7,9 +7,7 @@
           {{ store.locations.length }} location{{ store.locations.length !== 1 ? 's' : '' }}
         </p>
       </div>
-      <div v-if="!isStatic" class="flex gap-2">
-        <button class="blades-btn-gold" @click="openAdd(null)">+ Add Root Location</button>
-      </div>
+      <button v-if="!isStatic" class="blades-btn-gold" @click="openAdd(null)">+ Add Root Location</button>
     </div>
 
     <!-- Empty state -->
@@ -25,7 +23,6 @@
 
     <!-- Tree -->
     <div class="max-w-3xl">
-      <!-- Search -->
       <div v-if="store.locations.length > 0" class="mb-4">
         <input v-model="search" class="blades-input max-w-xs" placeholder="Search locations..." />
       </div>
@@ -35,11 +32,10 @@
         <div
           v-for="loc in searchResults"
           :key="loc.id"
-          class="blades-card p-3 flex items-center gap-3"
+          class="blades-card p-3 flex items-center gap-3 cursor-pointer hover:border-blades-border-light transition-colors"
+          @click="openDrawer(loc.id)"
         >
-          <span class="text-xs font-mono w-4" :class="`loc-type-${loc.type}`">
-            {{ TYPE_ICONS[loc.type] }}
-          </span>
+          <span class="text-xs font-mono w-4">{{ TYPE_ICONS[loc.type] }}</span>
           <div class="flex-1">
             <div class="flex items-center gap-2">
               <span class="font-sans font-semibold text-sm text-blades-text">{{ loc.name }}</span>
@@ -49,8 +45,7 @@
               {{ ancestorPath(loc.id) }}
             </div>
           </div>
-          <div v-if="!isStatic" class="flex gap-1">
-            <button class="blades-btn-ghost text-xs py-0.5 px-2" @click="openEdit(loc.id)">Edit</button>
+          <div v-if="!isStatic" class="flex gap-1" @click.stop>
             <button class="blades-btn-ghost text-xs py-0.5 px-2" @click="openAdd(loc.id)">+ Child</button>
             <button class="blades-btn-danger text-xs py-0.5 px-2" @click="del(loc.id)">✕</button>
           </div>
@@ -63,7 +58,7 @@
       <!-- Tree view -->
       <div v-else class="blades-card divide-y divide-blades-border/30">
         <div v-if="store.roots().length === 0 && store.locations.length > 0" class="p-4 text-blades-muted font-mono text-sm">
-          No root locations. All locations have a parent.
+          No root locations.
         </div>
         <div class="p-2">
           <LocationNode
@@ -72,7 +67,8 @@
             :loc="root"
             :all-locations="store.locations"
             :is-static="isStatic"
-            @edit="openEdit"
+            :faction-map="factionMap"
+            @view="openDrawer"
             @add-child="openAdd"
             @delete="del"
           />
@@ -80,15 +76,15 @@
       </div>
     </div>
 
-    <!-- Add / Edit modal -->
+    <!-- Add child modal (lightweight) -->
     <div v-if="showForm" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-      <div class="blades-card p-6 w-full max-w-lg">
-        <h2 class="text-xl mb-4">{{ editId ? 'Edit Location' : 'Add Location' }}</h2>
+      <div class="blades-card p-6 w-full max-w-md">
+        <h2 class="text-xl mb-4">Add Location</h2>
         <div class="space-y-3">
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="blades-label">Name *</label>
-              <input v-model="form.name" class="blades-input" placeholder="e.g. The Leaky Bucket" />
+              <input v-model="form.name" class="blades-input" placeholder="Location name" autofocus />
             </div>
             <div>
               <label class="blades-label">Type</label>
@@ -98,60 +94,71 @@
             </div>
           </div>
           <div>
-            <label class="blades-label">Parent Location</label>
+            <label class="blades-label">Parent</label>
             <select v-model="form.parentId" class="blades-select">
               <option :value="null">— None (root) —</option>
-              <option
-                v-for="loc in otherLocations"
-                :key="loc.id"
-                :value="loc.id"
-              >{{ indentedName(loc) }}</option>
+              <option v-for="loc in allLocations" :key="loc.id" :value="loc.id">{{ loc.name }}</option>
             </select>
           </div>
           <div>
             <label class="blades-label">Description</label>
-            <textarea v-model="form.description" class="blades-textarea" rows="3" placeholder="What is this place?" />
-          </div>
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="blades-label">Controlled By (Faction)</label>
-              <input v-model="form.controlledBy" class="blades-input" placeholder="Faction name" />
-            </div>
-            <div>
-              <label class="blades-label">Tags (comma-separated)</label>
-              <input v-model="tagsInput" class="blades-input" placeholder="e.g. tavern, canal, secret" />
-            </div>
-          </div>
-          <div>
-            <label class="blades-label">GM Notes</label>
-            <textarea v-model="form.notes" class="blades-textarea" rows="2" placeholder="Private GM notes" />
+            <textarea v-model="form.description" class="blades-textarea" rows="2" />
           </div>
         </div>
         <div class="flex gap-2 mt-4">
-          <button class="blades-btn-gold text-xs" @click="submit">{{ editId ? 'Save' : 'Create' }}</button>
+          <button class="blades-btn-gold text-xs" @click="submit">Create</button>
           <button class="blades-btn-ghost text-xs" @click="showForm = false">Cancel</button>
         </div>
       </div>
     </div>
+
+    <!-- Location detail drawer -->
+    <LocationDrawer
+      :open="drawerOpen"
+      :location-id="selectedId"
+      @close="drawerOpen = false"
+      @deleted="drawerOpen = false"
+      @navigate="openDrawer"
+      @add-child="(id) => { drawerOpen = false; openAdd(id) }"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useLocationsStore } from '@/stores/locations'
+import { useFactionsStore } from '@/stores/factions'
 import type { Location, LocationType } from '@/types/blades'
 import { LOCATION_TYPES, LOCATION_TYPE_LABELS } from '@/types/blades'
 import LocationNode from '@/components/LocationNode.vue'
+import LocationDrawer from '@/components/LocationDrawer.vue'
 
 declare const __STATIC_MODE__: boolean
 const isStatic = __STATIC_MODE__
 
 const store = useLocationsStore()
+const facStore = useFactionsStore()
 const search = ref('')
 
 const TYPE_ICONS: Record<string, string> = {
   world: '🌍', city: '🏙', district: '🏘', area: '📍',
   site: '🏛', room: '🚪', other: '◆',
+}
+
+// Build faction id → name map for LocationNode
+const factionMap = computed(() => {
+  const map: Record<string, string> = {}
+  for (const f of facStore.factions) map[f.id] = f.name
+  return map
+})
+
+// ── Drawer ────────────────────────────────────────────────────────────────
+const drawerOpen = ref(false)
+const selectedId = ref<string | null>(null)
+
+function openDrawer(id: string) {
+  selectedId.value = id
+  drawerOpen.value = true
 }
 
 // ── Search ────────────────────────────────────────────────────────────────
@@ -163,45 +170,29 @@ const searchResults = computed(() => {
     l.tags?.some(t => t.toLowerCase().includes(q))
   )
 })
-
 function ancestorPath(id: string) {
   return store.ancestors(id).map(a => a.name).join(' › ')
 }
 
-// ── Add / Edit form ────────────────────────────────────────────────────────
+// ── Add form (for creating new locations) ──────────────────────────────────
 const showForm = ref(false)
-const editId = ref<string | null>(null)
-const tagsInput = ref('')
-const form = ref<Partial<Location & { parentId: string | null }>>({
-  name: '', type: 'site', parentId: null, description: '', notes: '', controlledBy: '',
-})
+const form = ref<Partial<Location & { parentId: string | null }>>({})
+
+const allLocations = computed(() =>
+  store.locations.sort((a, b) => a.name.localeCompare(b.name))
+)
 
 function openAdd(parentId: string | null) {
-  editId.value = null
-  tagsInput.value = ''
-  form.value = { name: '', type: 'site', parentId, description: '', notes: '', controlledBy: '' }
-  showForm.value = true
-}
-
-function openEdit(id: string) {
-  const loc = store.get(id)
-  if (!loc) return
-  editId.value = id
-  tagsInput.value = (loc.tags ?? []).join(', ')
-  form.value = { ...loc }
+  form.value = { name: '', type: 'site', parentId, description: '' }
   showForm.value = true
 }
 
 function submit() {
   if (!form.value.name?.trim()) return
-  const tags = tagsInput.value ? tagsInput.value.split(',').map(t => t.trim()).filter(Boolean) : undefined
-  const data = { ...form.value, tags }
-  if (editId.value) {
-    store.update(editId.value, data)
-  } else {
-    store.create(data)
-  }
+  const created = store.create(form.value)
   showForm.value = false
+  // Open the drawer for the new location
+  openDrawer(created.id)
 }
 
 function del(id: string) {
@@ -211,17 +202,5 @@ function del(id: string) {
     ? `Delete "${loc?.name}" and its ${childCount} sub-location(s)?`
     : `Delete "${loc?.name}"?`
   if (confirm(msg)) store.remove(id)
-}
-
-// ── Parent selector helpers ────────────────────────────────────────────────
-const otherLocations = computed(() =>
-  store.locations
-    .filter(l => l.id !== editId.value)
-    .sort((a, b) => a.name.localeCompare(b.name))
-)
-
-function indentedName(loc: Location) {
-  const depth = store.ancestors(loc.id).length
-  return '  '.repeat(depth) + loc.name + ` (${LOCATION_TYPE_LABELS[loc.type]})`
 }
 </script>

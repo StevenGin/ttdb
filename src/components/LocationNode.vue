@@ -2,48 +2,36 @@
   <div>
     <!-- Location row -->
     <div
-      class="flex items-start gap-2 py-1.5 px-2 rounded-sm hover:bg-blades-surface/60 group transition-colors cursor-pointer"
-      @click="expanded = !expanded"
+      class="flex items-start gap-2 py-1.5 px-2 rounded hover:bg-blades-surface/60 group transition-colors"
     >
       <!-- Expand toggle -->
-      <span
-        class="text-blades-muted text-xs w-4 flex-shrink-0 mt-0.5 select-none transition-transform"
+      <button
+        class="text-blades-muted text-xs w-4 flex-shrink-0 mt-0.5 select-none transition-transform hover:text-blades-text"
         :class="expanded ? 'rotate-90' : ''"
         v-if="hasChildren"
-      >▶</span>
+        @click.stop="expanded = !expanded"
+      >▶</button>
       <span v-else class="w-4 flex-shrink-0" />
 
-      <!-- Type icon / color -->
+      <!-- Type icon -->
       <span class="text-xs font-mono flex-shrink-0 mt-0.5" :class="`loc-type-${loc.type}`">
         {{ TYPE_ICONS[loc.type] }}
       </span>
 
-      <!-- Name & type -->
-      <div class="flex-1 min-w-0" @click.stop>
+      <!-- Name & type — clicking opens drawer -->
+      <div class="flex-1 min-w-0 cursor-pointer" @click="$emit('view', loc.id)">
         <div class="flex items-center gap-2 flex-wrap">
-          <span class="font-sans font-semibold text-blades-text text-sm">{{ loc.name }}</span>
+          <span class="font-sans font-semibold text-blades-text text-sm group-hover:text-blades-gold transition-colors">{{ loc.name }}</span>
           <span class="blades-badge-muted text-[10px]">{{ LOCATION_TYPE_LABELS[loc.type] }}</span>
-          <span v-if="loc.controlledBy" class="text-[10px] font-mono text-blades-muted">
-            ⚑ {{ loc.controlledBy }}
-          </span>
+          <span v-if="controlledByName" class="text-[10px] font-mono text-blades-muted">⚑ {{ controlledByName }}</span>
         </div>
-        <p v-if="loc.description" class="text-blades-muted font-mono text-xs mt-0.5 line-clamp-2">{{ loc.description }}</p>
+        <p v-if="loc.description" class="text-blades-muted font-mono text-xs mt-0.5 line-clamp-1">{{ loc.description }}</p>
       </div>
 
       <!-- Actions -->
       <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" v-if="!isStatic" @click.stop>
-        <button
-          class="text-[10px] font-mono text-blades-muted hover:text-blades-gold px-1"
-          @click="$emit('edit', loc.id)"
-        >Edit</button>
-        <button
-          class="text-[10px] font-mono text-blades-muted hover:text-blades-gold px-1"
-          @click="$emit('add-child', loc.id)"
-        >+ Child</button>
-        <button
-          class="text-[10px] font-mono text-blades-muted hover:text-blades-red-light px-1"
-          @click="$emit('delete', loc.id)"
-        >✕</button>
+        <button class="text-[10px] font-mono text-blades-muted hover:text-blades-gold px-1" @click="$emit('add-child', loc.id)">+ Child</button>
+        <button class="text-[10px] font-mono text-blades-muted hover:text-blades-red-light px-1" @click="$emit('delete', loc.id)">✕</button>
       </div>
     </div>
 
@@ -55,7 +43,8 @@
         :loc="child"
         :all-locations="allLocations"
         :is-static="isStatic"
-        @edit="$emit('edit', $event)"
+        :faction-map="factionMap"
+        @view="$emit('view', $event)"
         @add-child="$emit('add-child', $event)"
         @delete="$emit('delete', $event)"
       />
@@ -72,10 +61,11 @@ const props = defineProps<{
   loc: Location
   allLocations: Location[]
   isStatic: boolean
+  factionMap?: Record<string, string>  // factionId → name
 }>()
 
 defineEmits<{
-  edit: [id: string]
+  view: [id: string]
   'add-child': [parentId: string]
   delete: [id: string]
 }>()
@@ -87,8 +77,13 @@ const children = computed(() =>
     .filter(l => l.parentId === props.loc.id)
     .sort((a, b) => a.name.localeCompare(b.name))
 )
-
 const hasChildren = computed(() => children.value.length > 0)
+
+const controlledByName = computed(() =>
+  props.loc.controlledBy && props.factionMap
+    ? (props.factionMap[props.loc.controlledBy] ?? '')
+    : ''
+)
 
 const TYPE_ICONS: Record<string, string> = {
   world: '🌍', city: '🏙', district: '🏘', area: '📍',

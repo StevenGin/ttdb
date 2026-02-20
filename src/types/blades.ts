@@ -112,6 +112,9 @@ export interface Character {
   specialAbilities: string[]
   items: CharacterItem[]
   // Relationships & notes
+  role?: string        // NPC role/title (e.g. "Faction Head", "Street Informant")
+  factionId?: string   // NPC: affiliated faction id
+  locationId?: string  // NPC: found at location id
   description?: string
   looks?: string
   notes?: string
