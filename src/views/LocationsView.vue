@@ -1,85 +1,181 @@
 <template>
-  <div class="p-6">
-    <div class="flex items-center justify-between mb-6 flex-wrap gap-4">
-      <div>
-        <h1 class="text-3xl text-blades-text glow-gold">Locations</h1>
-        <p class="text-blades-muted font-mono text-sm mt-1">
-          {{ store.locations.length }} location{{ store.locations.length !== 1 ? 's' : '' }}
-        </p>
+  <div class="flex flex-col h-screen overflow-hidden">
+
+    <!-- Top bar: breadcrumb + actions -->
+    <div class="flex-shrink-0 px-6 pt-5 pb-3 border-b border-blades-border flex items-center gap-4 flex-wrap">
+      <div class="flex-1 min-w-0">
+        <!-- Breadcrumb -->
+        <div class="flex items-center gap-1 flex-wrap font-mono text-sm">
+          <button
+            class="transition-colors"
+            :class="currentId === null ? 'text-blades-gold font-semibold' : 'text-blades-muted hover:text-blades-gold'"
+            @click="navigate(null)"
+          >World Map</button>
+          <template v-for="crumb in breadcrumbs" :key="crumb.id">
+            <span class="text-blades-border-light">›</span>
+            <button
+              class="transition-colors"
+              :class="crumb.id === currentId ? 'text-blades-gold font-semibold' : 'text-blades-muted hover:text-blades-gold'"
+              @click="navigate(crumb.id)"
+            >{{ crumb.name }}</button>
+          </template>
+          <template v-if="current">
+            <span class="text-blades-border-light">›</span>
+            <span class="text-blades-gold font-semibold">{{ current.name }}</span>
+          </template>
+        </div>
+        <!-- Title -->
+        <h1 class="text-2xl font-serif mt-0.5 leading-tight" :class="current ? 'text-blades-text glow-amber' : 'text-blades-text'">
+          {{ current?.name ?? 'All Locations' }}
+        </h1>
       </div>
-      <button v-if="!isStatic" class="blades-btn-gold" @click="openAdd(null)">+ Add Root Location</button>
+
+      <button v-if="!isStatic" class="blades-btn-ghost text-xs py-1.5" @click="openAdd(currentId)">
+        + {{ current ? 'Add Sub-location' : 'Add Location' }}
+      </button>
     </div>
 
-    <!-- Empty state -->
-    <div v-if="store.roots().length === 0" class="text-center py-24">
-      <div class="text-5xl mb-4 opacity-10">🗺</div>
-      <p class="text-blades-muted font-mono text-sm mb-4">No locations defined.</p>
-      <p class="text-blades-muted/60 font-mono text-xs mb-6">
-        Build your world from the top down:<br/>
-        World → City → District → Area → Site → Room
-      </p>
-      <button v-if="!isStatic" class="blades-btn-outline" @click="openAdd(null)">Add Your First Location</button>
-    </div>
+    <!-- Main body: grid (left) + info panel (right) -->
+    <div class="flex flex-1 overflow-hidden">
 
-    <!-- Tree -->
-    <div class="max-w-3xl">
-      <div v-if="store.locations.length > 0" class="mb-4">
-        <input v-model="search" class="blades-input max-w-xs" placeholder="Search locations..." />
+      <!-- Grid -->
+      <div class="flex-1 overflow-y-auto p-6">
+        <!-- Empty -->
+        <div v-if="gridItems.length === 0" class="flex flex-col items-center justify-center h-full py-12 text-center">
+          <div class="text-6xl mb-4 opacity-10 select-none">
+            {{ current ? TYPE_ICONS[current.type] : '🌍' }}
+          </div>
+          <p class="text-blades-muted font-mono text-sm">
+            {{ current ? `${current.name} has no sub-locations yet.` : 'No locations defined yet.' }}
+          </p>
+          <button v-if="!isStatic" class="blades-btn-outline text-xs mt-4" @click="openAdd(currentId)">
+            + Add {{ current ? 'sub-location' : 'first location' }}
+          </button>
+        </div>
+
+        <!-- Card grid -->
+        <div v-else class="grid gap-4" :class="gridCols">
+          <button
+            v-for="loc in gridItems"
+            :key="loc.id"
+            class="location-card group text-left"
+            @click="navigate(loc.id)"
+          >
+            <div class="aspect-square w-full overflow-hidden rounded relative bg-blades-card">
+              <!-- Banner image -->
+              <img
+                v-if="loc.bannerImage"
+                :src="loc.bannerImage"
+                :alt="loc.name"
+                class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+              />
+              <!-- Placeholder -->
+              <div v-else class="w-full h-full flex items-center justify-center">
+                <span class="text-5xl opacity-[0.08] select-none">{{ TYPE_ICONS[loc.type] }}</span>
+              </div>
+
+              <!-- Dark gradient overlay -->
+              <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent" />
+
+              <!-- Child count -->
+              <div
+                v-if="childCount(loc.id) > 0"
+                class="absolute top-2 right-2 bg-black/55 backdrop-blur-sm text-[10px] font-mono
+                       text-blades-muted/90 px-1.5 py-0.5 rounded"
+              >{{ childCount(loc.id) }} ›</div>
+
+              <!-- ✦ AI badge (no image) -->
+              <button
+                v-if="!isStatic && !loc.bannerImage"
+                class="absolute top-2 left-2 bg-black/55 backdrop-blur-sm text-[10px] font-mono
+                       text-amber-400 border border-amber-800/60 px-1.5 py-0.5 rounded
+                       opacity-0 group-hover:opacity-100 transition-opacity hover:bg-amber-900/40"
+                @click.stop="generateBanner(loc)"
+              >✦ AI</button>
+
+              <!-- Name + type -->
+              <div class="absolute bottom-0 left-0 right-0 p-3">
+                <div class="text-white font-serif font-semibold text-sm leading-tight drop-shadow-lg">
+                  {{ loc.name }}
+                </div>
+                <div class="text-white/55 font-mono text-[10px] mt-0.5 flex items-center gap-2">
+                  <span>{{ LOCATION_TYPE_LABELS[loc.type] }}</span>
+                  <span v-if="factionMap[loc.controlledBy ?? '']" class="text-amber-400/70">
+                    ⚑ {{ factionMap[loc.controlledBy!] }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </button>
+        </div>
       </div>
 
-      <!-- Flat search results -->
-      <div v-if="search" class="space-y-1">
+      <!-- Right info panel (shown when drilled into a location) -->
+      <Transition name="slide-info">
         <div
-          v-for="loc in searchResults"
-          :key="loc.id"
-          class="blades-card p-3 flex items-center gap-3 cursor-pointer hover:border-blades-border-light transition-colors"
-          @click="openDrawer(loc.id)"
+          v-if="current"
+          class="w-72 xl:w-80 flex-shrink-0 border-l border-blades-border overflow-y-auto flex flex-col bg-blades-surface"
         >
-          <span class="text-xs font-mono w-4">{{ TYPE_ICONS[loc.type] }}</span>
-          <div class="flex-1">
-            <div class="flex items-center gap-2">
-              <span class="font-sans font-semibold text-sm text-blades-text">{{ loc.name }}</span>
-              <span class="blades-badge-muted text-[10px]">{{ LOCATION_TYPE_LABELS[loc.type] }}</span>
-            </div>
-            <div v-if="ancestorPath(loc.id)" class="text-[10px] font-mono text-blades-muted mt-0.5">
-              {{ ancestorPath(loc.id) }}
-            </div>
-          </div>
-          <div v-if="!isStatic" class="flex gap-1" @click.stop>
-            <button class="blades-btn-ghost text-xs py-0.5 px-2" @click="openAdd(loc.id)">+ Child</button>
-            <button class="blades-btn-danger text-xs py-0.5 px-2" @click="del(loc.id)">✕</button>
-          </div>
-        </div>
-        <div v-if="searchResults.length === 0" class="text-blades-muted font-mono text-sm text-center py-8">
-          No locations match "{{ search }}"
-        </div>
-      </div>
-
-      <!-- Tree view -->
-      <div v-else class="blades-card divide-y divide-blades-border/30">
-        <div v-if="store.roots().length === 0 && store.locations.length > 0" class="p-4 text-blades-muted font-mono text-sm">
-          No root locations.
-        </div>
-        <div class="p-2">
-          <LocationNode
-            v-for="root in store.roots().sort((a,b) => a.name.localeCompare(b.name))"
-            :key="root.id"
-            :loc="root"
-            :all-locations="store.locations"
-            :is-static="isStatic"
-            :faction-map="factionMap"
-            @view="openDrawer"
-            @add-child="openAdd"
-            @delete="del"
+          <!-- Banner -->
+          <BannerImage
+            :model-value="current.bannerImage"
+            :subject="`${current.name}, ${LOCATION_TYPE_LABELS[current.type]} in Aurelion`"
+            :description="current.description"
+            :height="160"
+            @update:model-value="locStore.update(current!.id, { bannerImage: $event })"
           />
+
+          <div class="p-4 space-y-4 flex-1 overflow-y-auto">
+            <!-- Badges -->
+            <div class="flex flex-wrap gap-1.5">
+              <span class="blades-badge-muted text-xs">{{ LOCATION_TYPE_LABELS[current.type] }}</span>
+              <span v-if="controllingFaction" class="blades-badge-muted text-xs">⚑ {{ controllingFaction.name }}</span>
+            </div>
+
+            <!-- Tags -->
+            <div v-if="current.tags?.length" class="flex flex-wrap gap-1">
+              <span
+                v-for="tag in current.tags" :key="tag"
+                class="blades-badge text-[10px] border-blades-border text-blades-muted/70"
+              >{{ tag }}</span>
+            </div>
+
+            <!-- Description -->
+            <div v-if="current.description">
+              <div class="blades-label">Description</div>
+              <p class="text-blades-text/90 font-sans text-xs leading-relaxed">{{ current.description }}</p>
+            </div>
+
+            <!-- Notes -->
+            <div v-if="current.notes">
+              <div class="blades-label">Notes</div>
+              <p class="text-blades-muted font-mono text-xs leading-relaxed italic">{{ current.notes }}</p>
+            </div>
+
+            <div v-if="!current.description && !current.notes && !current.tags?.length"
+                 class="text-blades-muted/50 font-mono text-xs italic text-center py-4">
+              No details yet.
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div v-if="!isStatic" class="flex-shrink-0 p-3 border-t border-blades-border flex gap-2">
+            <button class="blades-btn-outline text-xs flex-1 py-1.5" @click="openDrawer(current!.id)">Edit</button>
+            <button class="blades-btn-ghost text-xs py-1.5 px-2" @click="openAdd(current!.id)" title="Add child">+</button>
+            <button class="blades-btn-danger text-xs py-1.5 px-2" @click="del(current!.id)" title="Delete">✕</button>
+          </div>
         </div>
-      </div>
+      </Transition>
     </div>
 
-    <!-- Add child modal (lightweight) -->
+    <!-- Create location modal -->
     <div v-if="showForm" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
       <div class="blades-card p-6 w-full max-w-md">
-        <h2 class="text-xl mb-4">Add Location</h2>
+        <h2 class="text-xl mb-1">{{ addParentId ? 'Add Sub-location' : 'Add Root Location' }}</h2>
+        <div v-if="addParentId" class="text-xs font-mono text-blades-muted mb-4">
+          inside <span class="text-blades-text">{{ locStore.get(addParentId)?.name }}</span>
+        </div>
+        <div v-else class="mb-4" />
         <div class="space-y-3">
           <div class="grid grid-cols-2 gap-3">
             <div>
@@ -89,16 +185,11 @@
             <div>
               <label class="blades-label">Type</label>
               <select v-model="form.type" class="blades-select">
-                <option v-for="t in LOCATION_TYPES" :key="t" :value="t">{{ LOCATION_TYPE_LABELS[t] }}</option>
+                <option v-for="t in LOCATION_TYPES" :key="t" :value="t">
+                  {{ TYPE_ICONS[t] }} {{ LOCATION_TYPE_LABELS[t] }}
+                </option>
               </select>
             </div>
-          </div>
-          <div>
-            <label class="blades-label">Parent</label>
-            <select v-model="form.parentId" class="blades-select">
-              <option :value="null">— None (root) —</option>
-              <option v-for="loc in allLocations" :key="loc.id" :value="loc.id">{{ loc.name }}</option>
-            </select>
           </div>
           <div>
             <label class="blades-label">Description</label>
@@ -112,14 +203,14 @@
       </div>
     </div>
 
-    <!-- Location detail drawer -->
+    <!-- Edit drawer (full form) -->
     <LocationDrawer
       :open="drawerOpen"
-      :location-id="selectedId"
+      :location-id="drawerLocationId"
       @close="drawerOpen = false"
-      @deleted="drawerOpen = false"
-      @navigate="openDrawer"
-      @add-child="(id) => { drawerOpen = false; openAdd(id) }"
+      @deleted="onDrawerDeleted"
+      @navigate="navigate"
+      @add-child="openAdd"
     />
   </div>
 </template>
@@ -130,77 +221,132 @@ import { useLocationsStore } from '@/stores/locations'
 import { useFactionsStore } from '@/stores/factions'
 import type { Location, LocationType } from '@/types/blades'
 import { LOCATION_TYPES, LOCATION_TYPE_LABELS } from '@/types/blades'
-import LocationNode from '@/components/LocationNode.vue'
+import BannerImage from '@/components/BannerImage.vue'
 import LocationDrawer from '@/components/LocationDrawer.vue'
 
 declare const __STATIC_MODE__: boolean
 const isStatic = __STATIC_MODE__
 
-const store = useLocationsStore()
+const locStore = useLocationsStore()
 const facStore = useFactionsStore()
-const search = ref('')
 
-const TYPE_ICONS: Record<string, string> = {
-  world: '🌍', city: '🏙', district: '🏘', area: '📍',
-  site: '🏛', room: '🚪', other: '◆',
+// ── Navigation ─────────────────────────────────────────────────────────────
+const currentId = ref<string | null>(null)
+
+const current = computed(() => (currentId.value ? locStore.get(currentId.value) ?? null : null))
+
+// Children of current location shown in the grid
+const gridItems = computed(() =>
+  locStore.children(currentId.value).sort((a, b) => a.name.localeCompare(b.name))
+)
+
+// Responsive columns: fewer items = larger cards
+const gridCols = computed(() => {
+  const n = gridItems.value.length
+  if (n <= 2) return 'grid-cols-2'
+  if (n <= 4) return 'grid-cols-2 sm:grid-cols-3'
+  if (n <= 9) return 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4'
+  return 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
+})
+
+// Ancestors of currentId for breadcrumb (excludes currentId itself)
+const breadcrumbs = computed(() => (currentId.value ? locStore.ancestors(currentId.value) : []))
+
+function navigate(id: string | null) {
+  currentId.value = id
 }
 
-// Build faction id → name map for LocationNode
+function childCount(id: string) {
+  return locStore.children(id).length
+}
+
+// ── Faction helpers ────────────────────────────────────────────────────────
 const factionMap = computed(() => {
   const map: Record<string, string> = {}
   for (const f of facStore.factions) map[f.id] = f.name
   return map
 })
 
-// ── Drawer ────────────────────────────────────────────────────────────────
+const controllingFaction = computed(() =>
+  current.value?.controlledBy ? facStore.get(current.value.controlledBy) ?? null : null
+)
+
+// ── AI banner ──────────────────────────────────────────────────────────────
+function generateBanner(loc: Location) {
+  const style = 'studio ghibli anime style, Frieren aesthetic, soft watercolor illustration, fantasy atmosphere'
+  const prompt = `${loc.name}, ${LOCATION_TYPE_LABELS[loc.type]} in a dark fantasy city, ${loc.description?.slice(0, 80) ?? ''}, ${style}`
+  const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=512&height=512&nologo=true&seed=${Math.floor(Math.random() * 9999)}&model=flux`
+  const img = new Image()
+  img.onload = () => locStore.update(loc.id, { bannerImage: url })
+  img.src = url
+}
+
+// ── Type icons ─────────────────────────────────────────────────────────────
+const TYPE_ICONS: Record<string, string> = {
+  world: '🌍', city: '🏙', district: '🏘', area: '📍',
+  site: '🏛', room: '🚪', other: '◆',
+}
+
+// ── Drawer ──────────────────────────────────────────────────────────────────
 const drawerOpen = ref(false)
-const selectedId = ref<string | null>(null)
+const drawerLocationId = ref<string | null>(null)
 
 function openDrawer(id: string) {
-  selectedId.value = id
+  drawerLocationId.value = id
   drawerOpen.value = true
 }
 
-// ── Search ────────────────────────────────────────────────────────────────
-const searchResults = computed(() => {
-  const q = search.value.toLowerCase()
-  return store.locations.filter(l =>
-    l.name.toLowerCase().includes(q) ||
-    l.description?.toLowerCase().includes(q) ||
-    l.tags?.some(t => t.toLowerCase().includes(q))
-  )
-})
-function ancestorPath(id: string) {
-  return store.ancestors(id).map(a => a.name).join(' › ')
+function onDrawerDeleted() {
+  drawerOpen.value = false
+  if (drawerLocationId.value === currentId.value) {
+    const loc = locStore.get(drawerLocationId.value ?? '')
+    currentId.value = loc?.parentId ?? null
+  }
 }
 
-// ── Add form (for creating new locations) ──────────────────────────────────
+// ── Add form ────────────────────────────────────────────────────────────────
 const showForm = ref(false)
-const form = ref<Partial<Location & { parentId: string | null }>>({})
-
-const allLocations = computed(() =>
-  store.locations.sort((a, b) => a.name.localeCompare(b.name))
-)
+const addParentId = ref<string | null>(null)
+const form = ref<Partial<Location>>({})
 
 function openAdd(parentId: string | null) {
-  form.value = { name: '', type: 'site', parentId, description: '' }
+  addParentId.value = parentId
+  form.value = { name: '', type: 'district', description: '' }
   showForm.value = true
 }
 
 function submit() {
   if (!form.value.name?.trim()) return
-  const created = store.create(form.value)
+  const created = locStore.create({ ...form.value, parentId: addParentId.value })
   showForm.value = false
-  // Open the drawer for the new location
+  currentId.value = addParentId.value
   openDrawer(created.id)
 }
 
+// ── Delete ──────────────────────────────────────────────────────────────────
 function del(id: string) {
-  const loc = store.get(id)
-  const childCount = store.descendants(id).length
-  const msg = childCount > 0
-    ? `Delete "${loc?.name}" and its ${childCount} sub-location(s)?`
-    : `Delete "${loc?.name}"?`
-  if (confirm(msg)) store.remove(id)
+  const loc = locStore.get(id)
+  const n = locStore.descendants(id).length
+  const msg = n > 0 ? `Delete "${loc?.name}" and its ${n} sub-location(s)?` : `Delete "${loc?.name}"?`
+  if (confirm(msg)) {
+    const parentId = loc?.parentId ?? null
+    locStore.remove(id)
+    currentId.value = parentId
+  }
 }
 </script>
+
+<style scoped>
+.location-card {
+  @apply rounded overflow-hidden border border-blades-border transition-all duration-200;
+}
+.location-card:hover {
+  @apply border-blades-gold/40;
+  box-shadow: 0 0 20px rgba(201, 168, 76, 0.1);
+}
+
+.slide-info-enter-active,
+.slide-info-leave-active { transition: all 0.22s ease; }
+.slide-info-enter-from,
+.slide-info-leave-to { opacity: 0; transform: translateX(16px); }
+</style>
