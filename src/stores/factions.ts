@@ -1,28 +1,35 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { Faction, FactionStatus, FactionCategory } from '@/types/blades'
-import { buildCoreFactions } from '@/data/factions'
+import { buildAurelionFactions } from '@/data/aurelion'
 
 const KEY = 'ttdb_factions'
 
 function makeId() { return Math.random().toString(36).slice(2, 10) }
 
+export function buildCoreFactions(): Faction[] {
+  const now = new Date().toISOString()
+  return buildAurelionFactions().map(f => ({
+    ...f,
+    crewStatus: 0 as FactionStatus,
+    createdAt: now,
+    updatedAt: now,
+  }))
+}
+
 export const useFactionsStore = defineStore('factions', () => {
   const factions = ref<Faction[]>([])
-  let initialized = false
 
   function load() {
     try {
       const raw = localStorage.getItem(KEY)
       if (raw) {
         factions.value = JSON.parse(raw)
-        initialized = true
         return
       }
     } catch { console.warn('Failed to load factions') }
-    // First run: seed with core factions
+    // First run: seed with Aurelion factions
     factions.value = buildCoreFactions()
-    initialized = true
     save()
   }
 
@@ -83,12 +90,18 @@ export const useFactionsStore = defineStore('factions', () => {
     return Array.from(cats).sort()
   })
 
+  function resetToAurelion() {
+    factions.value = buildCoreFactions()
+    save()
+  }
+
   function exportSnapshot() { return factions.value }
 
   return {
     factions,
     load, create, update, remove, setStatus, get,
     byCategory, categories,
+    resetToAurelion,
     exportSnapshot,
   }
 })

@@ -85,6 +85,8 @@ export interface Character {
   id: string
   name: string
   alias?: string
+  isNpc?: boolean       // true = NPC/world character, false/undefined = player character
+  bannerImage?: string  // URL or base64 data URL
   playbookId: string
   heritage: string
   background: string
@@ -129,7 +131,7 @@ export interface CrewUpgrade {
 export interface CrewClock {
   id: string
   name: string
-  segments: number // 4, 6, or 8
+  segments: ClockSegments
   filled: number
 }
 
@@ -139,6 +141,7 @@ export interface Crew {
   crewTypeId: string
   reputation: string // e.g. "audacious" "brutal" "honorable"...
   lair?: string       // locationId
+  bannerImage?: string
   tier: 0 | 1 | 2 | 3 | 4 | 5
   hold: 'strong' | 'weak'
   rep: number          // 0-12, resets at 12 to gain tier
@@ -202,6 +205,7 @@ export interface Location {
   controlledBy?: string      // factionId
   notableNpcs?: string[]
   linkedItemIds?: string[]
+  bannerImage?: string
   createdAt: string
   updatedAt: string
 }
@@ -232,6 +236,7 @@ export const FACTION_STATUS_COLORS: Record<FactionStatus, string> = {
 
 export type FactionCategory =
   | 'criminal'
+  | 'government'
   | 'institutions'
   | 'labor & trade'
   | 'streets'
@@ -250,6 +255,7 @@ export interface Faction {
   goals?: string
   threats?: string
   notes?: string
+  bannerImage?: string
   // Crew relationship (editable)
   crewStatus: FactionStatus
   isCore?: boolean         // built-in SRD faction vs. custom

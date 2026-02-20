@@ -38,15 +38,33 @@
       </div>
     </div>
 
-    <!-- Faction reset -->
-    <div class="blades-card p-4 mb-6">
-      <h2 class="text-lg mb-3">Factions</h2>
-      <div class="flex items-center justify-between">
-        <div>
-          <div class="text-sm font-sans text-blades-text">Reset Faction Status</div>
-          <div class="text-xs font-mono text-blades-muted">Set all faction relationships back to Neutral (0)</div>
+    <!-- Aurelion seed -->
+    <div class="blades-card p-4 mb-6 border-blades-sage/20">
+      <h2 class="text-lg mb-4">Aurelion World</h2>
+      <div class="space-y-3">
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="text-sm font-sans text-blades-text">Seed Aurelion Locations</div>
+            <div class="text-xs font-mono text-blades-muted">Replace locations with the 20 Aurelion districts (world → city → tiers → 14 districts)</div>
+          </div>
+          <button class="blades-btn-ghost text-xs" @click="seedLocations">Seed Locations</button>
         </div>
-        <button class="blades-btn-ghost text-xs" @click="resetFactionStatus">Reset Status</button>
+        <div class="blades-divider" />
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="text-sm font-sans text-blades-text">Seed Aurelion Factions</div>
+            <div class="text-xs font-mono text-blades-muted">Replace factions with the 14 Aurelion institutions and powers</div>
+          </div>
+          <button class="blades-btn-ghost text-xs" @click="seedFactions">Seed Factions</button>
+        </div>
+        <div class="blades-divider" />
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="text-sm font-sans text-blades-text">Reset Faction Status</div>
+            <div class="text-xs font-mono text-blades-muted">Set all faction relationships back to Neutral (0)</div>
+          </div>
+          <button class="blades-btn-ghost text-xs" @click="resetFactionStatus">Reset Status</button>
+        </div>
       </div>
     </div>
 
@@ -138,6 +156,16 @@ function clearAll() {
   if (!confirm('Delete ALL data permanently? This cannot be undone.')) return
   ['ttdb_characters', 'ttdb_locations', 'ttdb_factions', 'ttdb_items', 'ttdb_crew'].forEach(k => localStorage.removeItem(k))
   location.reload()
+}
+
+function seedLocations() {
+  if (!confirm('Replace all locations with the Aurelion world data?')) return
+  locStore.resetToAurelion()
+}
+
+function seedFactions() {
+  if (!confirm('Replace all factions with the Aurelion faction data?')) return
+  facStore.resetToAurelion()
 }
 
 function resetFactionStatus() {

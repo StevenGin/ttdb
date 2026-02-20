@@ -144,6 +144,7 @@
             <div>
               <label class="blades-label">Category</label>
               <select v-model="form.category" class="blades-select">
+                <option value="government">Government</option>
                 <option value="criminal">Criminal</option>
                 <option value="institutions">Institutions</option>
                 <option value="labor & trade">Labor & Trade</option>
@@ -278,7 +279,7 @@ const visibleCategories = computed<FactionCategory[]>(() => {
   for (const f of store.factions) {
     if (matchesFilter(f)) cats.add(f.category)
   }
-  const order: FactionCategory[] = ['criminal', 'underworld', 'institutions', 'labor & trade', 'streets', 'supernatural', 'other']
+  const order: FactionCategory[] = ['government', 'institutions', 'labor & trade', 'criminal', 'underworld', 'streets', 'supernatural', 'other']
   return order.filter(c => cats.has(c))
 })
 

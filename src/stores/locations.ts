@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import type { Location, LocationType } from '@/types/blades'
+import { buildAurelionLocations } from '@/data/aurelion'
 
 const KEY = 'ttdb_locations'
 
@@ -12,8 +13,14 @@ export const useLocationsStore = defineStore('locations', () => {
   function load() {
     try {
       const raw = localStorage.getItem(KEY)
-      if (raw) locations.value = JSON.parse(raw)
+      if (raw) {
+        locations.value = JSON.parse(raw)
+        return
+      }
     } catch { console.warn('Failed to load locations') }
+    // First run: seed with Aurelion world
+    locations.value = buildAurelionLocations()
+    save()
   }
 
   function save() {
@@ -81,6 +88,11 @@ export const useLocationsStore = defineStore('locations', () => {
   const typeOrder: LocationType[] = ['world', 'city', 'district', 'area', 'site', 'room', 'other']
   function typeRank(t: LocationType) { return typeOrder.indexOf(t) }
 
+  function resetToAurelion() {
+    locations.value = buildAurelionLocations()
+    save()
+  }
+
   function exportSnapshot() { return locations.value }
 
   return {
@@ -88,6 +100,7 @@ export const useLocationsStore = defineStore('locations', () => {
     load, create, update, remove, get,
     children, roots, ancestors, descendants,
     typeRank,
+    resetToAurelion,
     exportSnapshot,
   }
 })

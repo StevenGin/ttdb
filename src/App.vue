@@ -1,50 +1,54 @@
 <template>
   <div class="min-h-screen flex bg-blades-bg bg-fog">
     <!-- Sidebar -->
-    <aside class="w-52 flex-shrink-0 flex flex-col blades-panel border-r border-blades-border">
+    <aside class="w-56 flex-shrink-0 flex flex-col blades-panel border-r border-blades-border">
       <!-- Logo -->
       <div class="p-4 border-b border-blades-border">
         <div class="flex items-center gap-2">
-          <div class="w-8 h-8 bg-blades-gold/10 border border-blades-gold-dim flex items-center justify-center">
-            <span class="text-blades-gold font-serif text-sm">†</span>
+          <div class="w-8 h-8 bg-blades-gold/10 border border-blades-gold-dim flex items-center justify-center rounded-sm">
+            <span class="text-blades-gold font-serif text-sm">✦</span>
           </div>
           <div>
-            <div class="text-blades-gold font-serif font-bold text-sm uppercase tracking-widest glow-gold">TTDB</div>
+            <div class="text-blades-gold font-serif font-bold text-sm uppercase tracking-widest glow-amber">Aurelion</div>
             <div class="text-blades-muted font-mono text-[10px]">Blades in the Dark</div>
           </div>
         </div>
-        <div v-if="isStatic" class="mt-2 text-[10px] font-mono text-blades-muted border border-blades-border px-2 py-1 text-center">
+        <div v-if="isStatic" class="mt-2 text-[10px] font-mono text-blades-muted border border-blades-border px-2 py-1 text-center rounded-sm">
           ◆ READ-ONLY
         </div>
       </div>
 
       <!-- Nav -->
-      <nav class="flex-1 p-2 pt-3 space-y-0.5">
+      <nav class="flex-1 p-2 pt-3 space-y-0.5 overflow-y-auto">
+        <!-- The Crew -->
         <NavSection label="The Crew" />
         <RouterLink to="/crew" class="nav-link" :class="{ active: route.path === '/crew' }">
-          <span>⚓</span> The Crew
+          <span class="nav-icon">⚓</span> The Crew
+        </RouterLink>
+        <RouterLink to="/characters" class="nav-link" :class="{ active: route.path.startsWith('/characters') }">
+          <span class="nav-icon">◉</span> Player Characters
         </RouterLink>
 
-        <NavSection label="People" class="mt-3" />
-        <RouterLink to="/characters" class="nav-link" :class="{ active: route.path.startsWith('/characters') }">
-          <span>◉</span> Characters
+        <!-- The World -->
+        <NavSection label="The World" class="mt-3" />
+        <RouterLink to="/npcs" class="nav-link" :class="{ active: route.path === '/npcs' }">
+          <span class="nav-icon">◈</span> NPCs
         </RouterLink>
         <RouterLink to="/factions" class="nav-link" :class="{ active: route.path === '/factions' }">
-          <span>⚑</span> Factions
+          <span class="nav-icon">⚑</span> Factions
         </RouterLink>
-
-        <NavSection label="World" class="mt-3" />
         <RouterLink to="/locations" class="nav-link" :class="{ active: route.path === '/locations' }">
-          <span>🗺</span> Locations
+          <span class="nav-icon">◬</span> Locations
         </RouterLink>
         <RouterLink to="/items" class="nav-link" :class="{ active: route.path === '/items' }">
-          <span>◈</span> Items
+          <span class="nav-icon">◇</span> Items
         </RouterLink>
 
+        <!-- System -->
         <template v-if="!isStatic">
           <NavSection label="System" class="mt-3" />
           <RouterLink to="/settings" class="nav-link" :class="{ active: route.path === '/settings' }">
-            <span>⚙</span> Settings
+            <span class="nav-icon">⚙</span> Settings
           </RouterLink>
         </template>
       </nav>

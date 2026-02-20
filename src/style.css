@@ -1,5 +1,5 @@
-/* Google Fonts — must precede @tailwind directives */
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Barlow+Condensed:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap');
+/* Google Fonts — Cinzel (display), Playfair Display (body serif), Barlow Condensed (sans), Share Tech Mono */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Barlow+Condensed:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -23,13 +23,13 @@
   ::-webkit-scrollbar { width: 5px; height: 5px; }
   ::-webkit-scrollbar-track { @apply bg-blades-surface; }
   ::-webkit-scrollbar-thumb { @apply bg-blades-border-light rounded; }
-  ::-webkit-scrollbar-thumb:hover { @apply bg-blades-muted; }
+  ::-webkit-scrollbar-thumb:hover { @apply bg-blades-stone; }
 }
 
 @layer components {
   /* ── Layout ── */
   .blades-card {
-    @apply bg-blades-card border border-blades-border rounded-sm;
+    @apply bg-blades-card border border-blades-border rounded;
   }
   .blades-panel {
     @apply bg-blades-surface border border-blades-border;
@@ -38,7 +38,7 @@
   /* ── Buttons ── */
   .blades-btn {
     @apply px-4 py-1.5 font-serif font-semibold text-sm uppercase tracking-widest
-           border transition-all duration-150 cursor-pointer select-none rounded-sm;
+           border transition-all duration-200 cursor-pointer select-none rounded;
   }
   .blades-btn-gold {
     @apply blades-btn bg-blades-gold text-blades-bg border-blades-gold
@@ -59,7 +59,7 @@
 
   /* ── Form controls ── */
   .blades-input {
-    @apply bg-blades-bg border border-blades-border text-blades-text rounded-sm
+    @apply bg-blades-bg border border-blades-border text-blades-text rounded
            focus:border-blades-gold focus:outline-none focus:ring-1 focus:ring-blades-gold/30
            px-3 py-1.5 text-sm font-sans w-full;
   }
@@ -71,13 +71,14 @@
 
   /* ── Badges ── */
   .blades-badge {
-    @apply inline-block px-2 py-0.5 text-xs font-mono rounded-sm border;
+    @apply inline-block px-2 py-0.5 text-xs font-mono rounded border;
   }
   .blades-badge-gold   { @apply blades-badge text-blades-gold border-blades-gold-dim bg-blades-gold/10; }
   .blades-badge-red    { @apply blades-badge text-blades-red-light border-blades-red bg-blades-red/20; }
   .blades-badge-muted  { @apply blades-badge text-blades-muted border-blades-border; }
+  .blades-badge-green  { @apply blades-badge text-blades-sage-light border-blades-forest bg-blades-forest/20; }
   .blades-badge-occult { @apply blades-badge text-blades-occult-light border-blades-occult bg-blades-occult/15; }
-  .blades-badge-spark  { @apply blades-badge text-blades-spark-light border-blades-spark bg-blades-spark/20; }
+  .blades-badge-spark  { @apply blades-badge text-blades-mist-light border-blades-mist bg-blades-mist/20; }
 
   /* ── Divider ── */
   .blades-divider { @apply border-t border-blades-border my-4; }
@@ -85,16 +86,29 @@
   /* ── Nav ── */
   .nav-link {
     @apply flex items-center gap-2 px-3 py-2 text-sm font-serif uppercase tracking-wider
-           text-blades-muted border-l-2 border-transparent rounded-r-sm
-           hover:text-blades-text hover:border-blades-border-light
-           transition-all duration-150 cursor-pointer;
+           text-blades-muted border-l-2 border-transparent rounded-r
+           hover:text-blades-text hover:border-blades-sage hover:bg-blades-forest/10
+           transition-all duration-200 cursor-pointer;
   }
-  .nav-link.active { @apply text-blades-gold border-blades-gold bg-blades-gold/5; }
+  .nav-link.active {
+    @apply text-blades-gold border-blades-gold bg-blades-gold/5;
+  }
+  .nav-icon {
+    @apply text-blades-muted/70 w-4 text-center inline-block flex-shrink-0;
+  }
+  .nav-link.active .nav-icon { @apply text-blades-gold; }
 
-  /* ── Section header ── */
+  /* ── Section header — leaf-vine inspired ── */
   .section-header { @apply flex items-center gap-3 mb-4; }
   .section-header h2 { @apply text-base text-blades-gold m-0 whitespace-nowrap; }
-  .section-header::after { content: ''; @apply flex-1 border-t border-blades-border; }
+  .section-header::before {
+    content: '✦';
+    @apply text-blades-gold/40 text-xs flex-shrink-0;
+  }
+  .section-header::after {
+    content: '';
+    @apply flex-1 border-t border-blades-border;
+  }
 
   /* ── Stat box ── */
   .stat-box { @apply blades-card p-2 text-center min-w-[52px]; }
@@ -118,17 +132,37 @@
 
   /* ── Stress boxes ── */
   .stress-box {
-    @apply w-5 h-5 border border-blades-border-light cursor-pointer transition-colors duration-100 rounded-sm;
+    @apply w-5 h-5 border border-blades-border-light cursor-pointer transition-colors duration-100 rounded;
   }
   .stress-box.filled { @apply bg-blades-red border-blades-red; }
 
-  /* ── Gold glow ── */
-  .glow-gold { text-shadow: 0 0 16px rgba(201, 168, 76, 0.5); }
+  /* ── Gold glow (Ghibli warm amber light) ── */
+  .glow-gold   { text-shadow: 0 0 20px rgba(201, 168, 76, 0.6), 0 0 40px rgba(201, 168, 76, 0.2); }
+  .glow-amber  { text-shadow: 0 0 20px rgba(201, 168, 76, 0.5), 0 0 50px rgba(160, 120, 40, 0.2); }
+  .glow-green  { text-shadow: 0 0 20px rgba(95, 138, 96, 0.6), 0 0 40px rgba(42, 92, 62, 0.3); }
 }
 
-/* Subtle fog overlay */
+/* ── Background atmosphere — forest canopy + warm fog ── */
 .bg-fog {
   background:
-    radial-gradient(ellipse at top, rgba(30, 20, 60, 0.4) 0%, transparent 65%),
-    radial-gradient(ellipse at bottom-right, rgba(12, 11, 18, 0.6) 0%, transparent 60%);
+    radial-gradient(ellipse at top left, rgba(42, 92, 62, 0.12) 0%, transparent 50%),
+    radial-gradient(ellipse at bottom right, rgba(201, 168, 76, 0.06) 0%, transparent 60%),
+    radial-gradient(ellipse at center, rgba(14, 20, 16, 0.5) 0%, transparent 80%);
+}
+
+/* ── Parchment texture for cards (subtle) ── */
+.blades-card {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Crect width='4' height='4' fill='transparent'/%3E%3Ccircle cx='1' cy='1' r='0.5' fill='rgba(201,168,76,0.03)'/%3E%3C/svg%3E");
+}
+
+/* ── Nature-inspired decorative borders ── */
+.nature-border {
+  border-image: linear-gradient(
+    to right,
+    transparent,
+    rgba(95, 138, 96, 0.4) 20%,
+    rgba(201, 168, 76, 0.3) 50%,
+    rgba(95, 138, 96, 0.4) 80%,
+    transparent
+  ) 1;
 }

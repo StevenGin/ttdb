@@ -2,13 +2,13 @@
   <div class="p-6">
     <div class="flex items-center justify-between mb-6 flex-wrap gap-4">
       <div>
-        <h1 class="text-3xl text-blades-text glow-gold">Characters</h1>
-        <p class="text-blades-muted font-mono text-sm mt-1">{{ store.characters.length }} scoundrel{{ store.characters.length !== 1 ? 's' : '' }}</p>
+        <h1 class="text-3xl text-blades-text glow-amber">Player Characters</h1>
+        <p class="text-blades-muted font-mono text-sm mt-1">{{ pcs.length }} scoundrel{{ pcs.length !== 1 ? 's' : '' }}</p>
       </div>
       <button v-if="!isStatic" class="blades-btn-gold" @click="create">+ New Character</button>
     </div>
 
-    <div v-if="store.characters.length === 0" class="text-center py-24">
+    <div v-if="pcs.length === 0" class="text-center py-24">
       <div class="text-6xl mb-4 opacity-10 font-serif">†</div>
       <p class="text-blades-muted font-mono text-sm mb-4">No characters yet.</p>
       <button v-if="!isStatic" class="blades-btn-outline" @click="create">Create a Scoundrel</button>
@@ -16,11 +16,16 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
       <RouterLink
-        v-for="ch in store.characters"
+        v-for="ch in pcs"
         :key="ch.id"
         :to="`/characters/${ch.id}`"
         class="blades-card p-4 hover:border-blades-border-light transition-colors cursor-pointer group"
       >
+        <!-- Banner thumbnail -->
+        <div v-if="ch.bannerImage" class="h-24 mb-3 overflow-hidden rounded-sm -mx-4 -mt-4">
+          <img :src="ch.bannerImage" class="w-full h-full object-cover" :alt="ch.name" />
+        </div>
+
         <!-- Playbook -->
         <div class="flex items-center justify-between mb-2">
           <span class="blades-badge-gold text-xs">{{ playbookName(ch.playbookId) }}</span>
@@ -76,6 +81,7 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useRouter } from 'vue-router'
 import { useCharactersStore } from '@/stores/characters'
@@ -88,12 +94,15 @@ const isStatic = __STATIC_MODE__
 const store = useCharactersStore()
 const router = useRouter()
 
+// Player characters only
+const pcs = computed(() => store.characters.filter(c => !c.isNpc))
+
 function playbookName(id: string) {
   return PLAYBOOKS.find(p => p.id === id)?.name ?? (id || 'No Playbook')
 }
 
 function create() {
-  const ch = store.create()
+  const ch = store.create({ isNpc: false })
   router.push(`/characters/${ch.id}`)
 }
 

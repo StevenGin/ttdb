@@ -1,6 +1,19 @@
 <template>
-  <div class="p-6 max-w-5xl" v-if="ch">
-    <RouterLink to="/characters" class="text-blades-muted hover:text-blades-gold font-mono text-sm mb-6 inline-block">← Back to Characters</RouterLink>
+  <div class="max-w-5xl" v-if="ch">
+    <!-- Banner -->
+    <BannerImage
+      :model-value="ch.bannerImage"
+      :subject="ch.name"
+      :description="ch.looks || ch.notes"
+      :height="200"
+      @update:model-value="store.update(ch.id, { bannerImage: $event })"
+    />
+
+    <div class="p-6">
+    <RouterLink
+      :to="ch.isNpc ? '/npcs' : '/characters'"
+      class="text-blades-muted hover:text-blades-gold font-mono text-sm mb-6 inline-block"
+    >← Back to {{ ch.isNpc ? 'NPCs' : 'Characters' }}</RouterLink>
 
     <!-- Header -->
     <div class="blades-card p-5 mb-5">
@@ -331,17 +344,41 @@
 
           <!-- Add custom item -->
           <div v-if="!isStatic" class="mt-3 pt-3 border-t border-blades-border/50">
-            <div v-if="addingItem" class="flex gap-2 items-end flex-wrap">
-              <div class="flex-1 min-w-[120px]">
-                <label class="blades-label">Item Name</label>
-                <input v-model="newItemName" class="blades-input text-xs" placeholder="Item name" />
+            <div v-if="addingItem" class="space-y-2">
+              <!-- Pick from items store -->
+              <div v-if="availableItems.length > 0">
+                <label class="blades-label">From Item Database</label>
+                <div class="space-y-1 max-h-40 overflow-y-auto pr-1">
+                  <button
+                    v-for="item in availableItems"
+                    :key="item.id"
+                    class="w-full flex items-center gap-2 px-2 py-1.5 text-xs font-sans text-left
+                           border border-blades-border rounded-sm hover:border-blades-gold/50
+                           hover:bg-blades-gold/5 transition-colors"
+                    @click="addFromDatabase(item.id)"
+                  >
+                    <span class="flex-1 text-blades-text">{{ item.name }}</span>
+                    <span class="text-blades-muted font-mono">{{ item.load }}L</span>
+                    <span v-if="item.tags?.length" class="text-blades-muted/60 font-mono text-[10px]">
+                      {{ item.tags.slice(0,2).join(', ') }}
+                    </span>
+                  </button>
+                </div>
+                <div class="text-blades-muted font-mono text-[10px] my-2 text-center">— or add custom —</div>
               </div>
-              <div class="w-14">
-                <label class="blades-label">Load</label>
-                <input v-model.number="newItemLoad" type="number" min="0" max="3" class="blades-input text-xs" />
+              <!-- Custom item form -->
+              <div class="flex gap-2 items-end flex-wrap">
+                <div class="flex-1 min-w-[120px]">
+                  <label class="blades-label">Custom Item</label>
+                  <input v-model="newItemName" class="blades-input text-xs" placeholder="Item name" />
+                </div>
+                <div class="w-14">
+                  <label class="blades-label">Load</label>
+                  <input v-model.number="newItemLoad" type="number" min="0" max="3" class="blades-input text-xs" />
+                </div>
+                <button class="blades-btn-gold text-xs py-1" @click="addItem">Add</button>
+                <button class="blades-btn-ghost text-xs py-1" @click="addingItem = false">✕</button>
               </div>
-              <button class="blades-btn-gold text-xs py-1" @click="addItem">Add</button>
-              <button class="blades-btn-ghost text-xs py-1" @click="addingItem = false">✕</button>
             </div>
             <button v-else class="text-blades-muted hover:text-blades-gold font-mono text-xs" @click="addingItem = true">+ Add item</button>
           </div>
@@ -368,6 +405,7 @@
         </div>
       </div>
     </div>
+    </div><!-- /p-6 -->
   </div>
   <div v-else class="p-6 text-blades-muted font-mono">Character not found.</div>
 </template>
@@ -376,9 +414,11 @@
 import { ref, computed } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { useCharactersStore } from '@/stores/characters'
+import { useItemsStore } from '@/stores/items'
 import { PLAYBOOKS } from '@/data/playbooks'
 import type { Character, ActionName, HarmLevel } from '@/types/blades'
 import { ACTION_GROUPS } from '@/types/blades'
+import BannerImage from '@/components/BannerImage.vue'
 
 declare const __STATIC_MODE__: boolean
 const isStatic = __STATIC_MODE__
@@ -386,6 +426,7 @@ const isStatic = __STATIC_MODE__
 const route = useRoute()
 const router = useRouter()
 const store = useCharactersStore()
+const itemsStore = useItemsStore()
 
 const ch = computed(() => store.get(route.params.id as string))
 const playbook = computed(() => PLAYBOOKS.find(p => p.id === ch.value?.playbookId))
@@ -475,6 +516,27 @@ function toggleAbility(name: string) {
 }
 
 // ── Items ─────────────────────────────────────────────────────────────────
+// Items from the global catalog not already held by this character
+const availableItems = computed(() => {
+  const heldIds = new Set(ch.value!.items.map(i => i.itemId).filter(Boolean))
+  return itemsStore.items.filter(i => !heldIds.has(i.id))
+})
+
+function addFromDatabase(itemId: string) {
+  const item = itemsStore.get(itemId)
+  if (!item) return
+  store.update(ch.value!.id, {
+    items: [...ch.value!.items, {
+      id: Math.random().toString(36).slice(2, 8),
+      name: item.name,
+      load: item.load,
+      equipped: true,
+      itemId: item.id,
+    }]
+  })
+  addingItem.value = false
+}
+
 const equippedPlaybookItems = computed(() =>
   ch.value!.items.filter(i => i.equipped && i.itemId === 'playbook').map(i => i.name)
 )
