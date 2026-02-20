@@ -2,7 +2,7 @@
   "name": "ttdb",
   "version": "0.1.0",
   "type": "module",
-  "description": "Lancer RPG companion site — local editor + GitHub Pages static publisher",
+  "description": "Blades in the Dark campaign companion — local editor + GitHub Pages static publisher",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
