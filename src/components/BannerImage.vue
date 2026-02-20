@@ -109,7 +109,7 @@ async function generateImage() {
 
   const subject = props.subject || 'fantasy location'
   const desc = props.description ? `. ${props.description.slice(0, 120)}` : ''
-  const stylePrompt = 'studio ghibli anime style, Frieren Beyond Journey\'s End aesthetic, Delicious in Dungeon dungeonmeshi art style, soft watercolor illustration, warm earthy tones, detailed background, cozy fantasy atmosphere, masterpiece'
+  const stylePrompt = 'Frieren Beyond Journey\'s End anime art style, studio ghibli, soft watercolor illustration, muted cool tones, twilight atmosphere, ancient fantasy world, moonlit palette, misty distant landscape, intricate details, masterpiece quality'
   const fullPrompt = `${subject}${desc}, ${stylePrompt}`
   generatingPrompt.value = fullPrompt.slice(0, 80) + '...'
 

@@ -136,33 +136,35 @@
   }
   .stress-box.filled { @apply bg-blades-red border-blades-red; }
 
-  /* ── Gold glow (Ghibli warm amber light) ── */
-  .glow-gold   { text-shadow: 0 0 20px rgba(201, 168, 76, 0.6), 0 0 40px rgba(201, 168, 76, 0.2); }
-  .glow-amber  { text-shadow: 0 0 20px rgba(201, 168, 76, 0.5), 0 0 50px rgba(160, 120, 40, 0.2); }
-  .glow-green  { text-shadow: 0 0 20px rgba(95, 138, 96, 0.6), 0 0 40px rgba(42, 92, 62, 0.3); }
+  /* ── Glows (Frieren — moonlight silver, ancient amber, magic blue) ── */
+  .glow-gold   { text-shadow: 0 0 20px rgba(196, 168, 101, 0.65), 0 0 45px rgba(196, 168, 101, 0.2); }
+  .glow-amber  { text-shadow: 0 0 20px rgba(196, 168, 101, 0.55), 0 0 55px rgba(150, 120, 50, 0.2); }
+  .glow-silver { text-shadow: 0 0 20px rgba(200, 204, 232, 0.7),  0 0 50px rgba(120, 120, 152, 0.3); }
+  .glow-green  { text-shadow: 0 0 20px rgba(60, 90, 154, 0.65),   0 0 45px rgba(28, 46, 90, 0.35); }
 }
 
-/* ── Background atmosphere — forest canopy + warm fog ── */
+/* ── Background atmosphere — Frieren's twilight sky + ancient mist ── */
 .bg-fog {
   background:
-    radial-gradient(ellipse at top left, rgba(42, 92, 62, 0.12) 0%, transparent 50%),
-    radial-gradient(ellipse at bottom right, rgba(201, 168, 76, 0.06) 0%, transparent 60%),
-    radial-gradient(ellipse at center, rgba(14, 20, 16, 0.5) 0%, transparent 80%);
+    radial-gradient(ellipse at top left,    rgba(28, 46, 90, 0.20) 0%, transparent 55%),
+    radial-gradient(ellipse at top right,   rgba(74, 42, 122, 0.10) 0%, transparent 45%),
+    radial-gradient(ellipse at bottom right,rgba(196, 168, 101, 0.06) 0%, transparent 60%),
+    radial-gradient(ellipse at center,      rgba(12, 14, 26, 0.55) 0%, transparent 80%);
 }
 
-/* ── Parchment texture for cards (subtle) ── */
+/* ── Moonstone texture for cards (subtle silver shimmer) ── */
 .blades-card {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Crect width='4' height='4' fill='transparent'/%3E%3Ccircle cx='1' cy='1' r='0.5' fill='rgba(201,168,76,0.03)'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Crect width='4' height='4' fill='transparent'/%3E%3Ccircle cx='1' cy='1' r='0.5' fill='rgba(200,204,232,0.03)'/%3E%3C/svg%3E");
 }
 
-/* ── Nature-inspired decorative borders ── */
+/* ── Ancient-rune decorative borders — slate-blue and amber ── */
 .nature-border {
   border-image: linear-gradient(
     to right,
     transparent,
-    rgba(95, 138, 96, 0.4) 20%,
-    rgba(201, 168, 76, 0.3) 50%,
-    rgba(95, 138, 96, 0.4) 80%,
+    rgba(60, 90, 154, 0.4) 20%,
+    rgba(196, 168, 101, 0.35) 50%,
+    rgba(60, 90, 154, 0.4) 80%,
     transparent
   ) 1;
 }

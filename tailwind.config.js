@@ -4,46 +4,49 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Aurelion — Studio Ghibli / Frieren / Dungeonmeshi palette
-        // Warm earthy tones, forest greens, parchment, ancient stone
+        // Aurelion — Frieren: Beyond Journey's End palette
+        // Cool midnight blue, moon-silver, ancient amber, twilight slate
         blades: {
-          // Backgrounds
-          bg:           '#0e1410',   // deep forest dark
-          surface:      '#141d18',   // dark moss
-          card:         '#1b2720',   // warm stone-green
-          // Borders
-          border:       '#2c3d32',   // mossy green
-          'border-light': '#456050', // sage-moss
-          // Text
-          text:         '#e2d9c8',   // warm parchment-cream
-          muted:        '#8a8a78',   // warm taupe-grey
-          // Gold / Amber
-          gold:         '#c9a84c',   // warm amber (kept)
-          'gold-dim':   '#7a6428',   // dark amber
-          'gold-light': '#e0c060',   // bright amber
+          // Backgrounds — deep twilight sky, Frieren's misty world
+          bg:           '#0c0e1a',   // midnight slate-blue
+          surface:      '#111428',   // deep twilight navy
+          card:         '#181d32',   // indigo-charcoal
+          // Borders — blue-slate, like ancient stonework
+          border:       '#262c4a',   // slate border
+          'border-light': '#44487a', // medium violet-slate
+          // Text — moonlight and parchment
+          text:         '#dde0f0',   // cool moonlight silver-white
+          muted:        '#7880a0',   // lavender-gray dust
+          // Gold / Amber — ancient rune magic, campfire warmth
+          gold:         '#c4a865',   // ancient amber rune-gold
+          'gold-dim':   '#6a5828',   // dark amber
+          'gold-light': '#e0ca70',   // bright rune-gold
           // Red / Danger
-          red:          '#5e2218',   // deep rust
-          'red-light':  '#c0522a',   // warm rust-orange
-          // Greens (nature)
-          forest:       '#2a5c3e',   // deep forest
-          sage:         '#5f8a60',   // sage green
-          'sage-light': '#8fb880',   // light sage
-          // Blues (sky, mist)
-          mist:         '#3a6478',   // misty blue
-          'mist-light': '#6ea8be',   // light mist
-          // Earth tones
-          parchment:    '#c9b490',   // aged parchment
-          stone:        '#6e6055',   // dark stone
-          'stone-light': '#a09080',  // light stone
-          // Old palette compat
-          allied:       '#2a5c3e',
-          friendly:     '#3a7a50',
-          hostile:      '#7a4a20',
-          war:          '#6e2010',
-          spark:        '#2a4e6a',
-          'spark-light': '#6ea8be',
-          occult:       '#5a3a7a',
-          'occult-light': '#b0a0d8',
+          red:          '#5e1e28',   // dark crimson
+          'red-light':  '#c04050',   // bright crimson
+          // Blues — Frieren's world (replaces greens)
+          forest:       '#1c2e5a',   // deep dusk-blue
+          sage:         '#3c5a9a',   // muted cornflower-blue
+          'sage-light': '#8090c0',   // periwinkle mist
+          // Night mist
+          mist:         '#3a4a78',   // night-mist blue
+          'mist-light': '#6478b0',   // twilight blue
+          // Stone & parchment — touched by moonlight
+          parchment:    '#c0bed8',   // moon-parchment
+          stone:        '#585878',   // blue-stone
+          'stone-light': '#8888a8',  // light moon-stone
+          // Silver — Frieren's signature
+          silver:       '#c8cce8',   // Frieren's silver-hair light
+          'silver-dim': '#787898',   // muted moonsilver
+          // Compat palette — shifted to cooler tones
+          allied:       '#1c3a60',
+          friendly:     '#2a5090',
+          hostile:      '#7a3820',
+          war:          '#6e1020',
+          spark:        '#2a3c7a',
+          'spark-light': '#6474b8',
+          occult:       '#4a2a7a',   // Frieren's ancient magic — deep purple
+          'occult-light': '#a090d8',
         },
       },
       fontFamily: {
