@@ -7,13 +7,13 @@ export default {
         // Aurelion — Frieren: Beyond Journey's End palette
         // Cool midnight blue, moon-silver, ancient amber, twilight slate
         blades: {
-          // Backgrounds — deep twilight sky, Frieren's misty world
-          bg:           '#0c0e1a',   // midnight slate-blue
-          surface:      '#111428',   // deep twilight navy
-          card:         '#181d32',   // indigo-charcoal
-          // Borders — blue-slate, like ancient stonework
-          border:       '#262c4a',   // slate border
-          'border-light': '#44487a', // medium violet-slate
+          // Backgrounds — Frieren's soft twilight (lifted for readability)
+          bg:           '#181c2e',   // deep slate-blue (lighter than midnight)
+          surface:      '#1f2338',   // twilight navy
+          card:         '#272d48',   // slate-indigo card
+          // Borders — more visible against lifted backgrounds
+          border:       '#363d62',   // slate border
+          'border-light': '#5560a0', // medium violet-slate
           // Text — moonlight and parchment
           text:         '#dde0f0',   // cool moonlight silver-white
           muted:        '#7880a0',   // lavender-gray dust

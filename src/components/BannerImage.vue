@@ -62,8 +62,20 @@
       v-if="generating"
       class="absolute inset-0 flex flex-col items-center justify-center bg-black/70 rounded-sm"
     >
-      <div class="text-blades-gold font-mono text-xs mb-2 animate-pulse">Painting the scene...</div>
+      <div class="text-blades-gold font-mono text-xs mb-2 animate-pulse">
+        {{ retrying ? 'Retrying...' : 'Painting the scene...' }}
+      </div>
       <div class="text-blades-muted font-mono text-[10px] text-center px-4">{{ generatingPrompt }}</div>
+    </div>
+
+    <!-- Error overlay -->
+    <div
+      v-if="genError"
+      class="absolute inset-0 flex flex-col items-center justify-center bg-black/75 rounded-sm"
+    >
+      <div class="text-red-400 font-mono text-xs mb-2">Generation failed</div>
+      <div class="text-blades-muted font-mono text-[10px] text-center px-4 mb-3">Check connection and try again</div>
+      <button class="blades-btn-ghost text-[10px] py-1 px-3" @click="genError = false">Dismiss</button>
     </div>
   </div>
 </template>
@@ -91,6 +103,8 @@ const isStatic = __STATIC_MODE__
 
 const generating = ref(false)
 const generatingPrompt = ref('')
+const retrying = ref(false)
+const genError = ref(false)
 
 // ── File upload ─────────────────────────────────────────────────────────────
 function onFileUpload(event: Event) {
@@ -104,8 +118,28 @@ function onFileUpload(event: Event) {
 }
 
 // ── AI generation via Pollinations.ai ────────────────────────────────────────
+function makeUrl(encoded: string, seed: number) {
+  const dims = props.square ? 'width=768&height=768' : `width=1280&height=${height * 2}`
+  return `https://image.pollinations.ai/prompt/${encoded}?${dims}&nologo=true&seed=${seed}&model=flux`
+}
+
+function loadImage(url: string): Promise<void> {
+  return Promise.race([
+    new Promise<void>((resolve, reject) => {
+      const img = new Image()
+      img.onload = () => resolve()
+      img.onerror = () => reject(new Error('load'))
+      img.src = url
+    }),
+    new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('timeout')), 60_000)
+    ),
+  ])
+}
+
 async function generateImage() {
   if (generating.value) return
+  genError.value = false
 
   const subject = props.subject || 'fantasy location'
   const desc = props.description ? `. ${props.description.slice(0, 120)}` : ''
@@ -114,27 +148,32 @@ async function generateImage() {
   generatingPrompt.value = fullPrompt.slice(0, 80) + '...'
 
   generating.value = true
-  try {
-    const encoded = encodeURIComponent(fullPrompt)
-    // Pollinations AI — free, no API key required
-    const seed = Math.floor(Math.random() * 9999)
-    const dims = props.square ? 'width=768&height=768' : `width=1280&height=${height * 2}`
-    const url = `https://image.pollinations.ai/prompt/${encoded}?${dims}&nologo=true&seed=${seed}&model=flux`
-    // Prefetch to confirm it loaded then set
-    const img = new Image()
-    await new Promise<void>((resolve, reject) => {
-      img.onload = () => resolve()
-      img.onerror = () => reject(new Error('Image failed to load'))
-      img.src = url
-    })
-    emit('update:modelValue', url)
-  } catch (err) {
-    console.warn('AI image generation failed:', err)
-    alert('Image generation failed. Check your connection and try again.')
-  } finally {
-    generating.value = false
-    generatingPrompt.value = ''
+  retrying.value = false
+
+  const encoded = encodeURIComponent(fullPrompt)
+
+  for (let attempt = 0; attempt < 2; attempt++) {
+    if (attempt === 1) retrying.value = true
+    const seed = Math.floor(Math.random() * 99_999)
+    const url = makeUrl(encoded, seed)
+    try {
+      // Pollinations AI — free, no API key required
+      await loadImage(url)
+      emit('update:modelValue', url)
+      generating.value = false
+      retrying.value = false
+      generatingPrompt.value = ''
+      return
+    } catch {
+      // first failure: loop for one retry; second: fall through to error
+    }
   }
+
+  console.warn('AI image generation failed after retry')
+  genError.value = true
+  generating.value = false
+  retrying.value = false
+  generatingPrompt.value = ''
 }
 </script>
 
@@ -142,12 +181,12 @@ async function generateImage() {
 .banner-placeholder {
   background: repeating-linear-gradient(
     -45deg,
-    var(--tw-color-blades-surface, #141e1b) 0px,
-    var(--tw-color-blades-surface, #141e1b) 10px,
+    #1f2338 0px,
+    #1f2338 10px,
     transparent 10px,
     transparent 20px
   );
-  background-color: #141e1b;
+  background-color: #1f2338;
 }
 .banner-ai-btn {
   @apply font-mono border border-amber-700 text-amber-400 bg-amber-900/20
