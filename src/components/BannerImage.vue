@@ -123,18 +123,25 @@ function makeUrl(encoded: string, seed: number) {
   return `https://image.pollinations.ai/prompt/${encoded}?${dims}&nologo=true&seed=${seed}&model=flux`
 }
 
-function loadImage(url: string): Promise<void> {
-  return Promise.race([
-    new Promise<void>((resolve, reject) => {
-      const img = new Image()
-      img.onload = () => resolve()
-      img.onerror = () => reject(new Error('load'))
-      img.src = url
-    }),
-    new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error('timeout')), 60_000)
-    ),
-  ])
+// Fetch image via fetch() → blob → data URL.
+// Gives real HTTP status codes; embeds the image so it stays even if the
+// Pollinations URL eventually changes.
+async function fetchAsDataUrl(url: string): Promise<string> {
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), 90_000)
+  try {
+    const res = await fetch(url, { signal: controller.signal })
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    const blob = await res.blob()
+    return await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = () => resolve(reader.result as string)
+      reader.onerror = () => reject(new Error('FileReader failed'))
+      reader.readAsDataURL(blob)
+    })
+  } finally {
+    clearTimeout(timer)
+  }
 }
 
 async function generateImage() {
@@ -157,19 +164,18 @@ async function generateImage() {
     const seed = Math.floor(Math.random() * 99_999)
     const url = makeUrl(encoded, seed)
     try {
-      // Pollinations AI — free, no API key required
-      await loadImage(url)
-      emit('update:modelValue', url)
+      const dataUrl = await fetchAsDataUrl(url)
+      emit('update:modelValue', dataUrl)
       generating.value = false
       retrying.value = false
       generatingPrompt.value = ''
       return
-    } catch {
-      // first failure: loop for one retry; second: fall through to error
+    } catch (err) {
+      console.warn(`AI generation attempt ${attempt + 1} failed:`, err)
+      // loop for one retry, then fall through to error state
     }
   }
 
-  console.warn('AI image generation failed after retry')
   genError.value = true
   generating.value = false
   retrying.value = false
