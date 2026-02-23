@@ -86,6 +86,8 @@ export interface Character {
   name: string
   alias?: string
   isNpc?: boolean       // true = NPC/world character, false/undefined = player character
+  isPublic?: boolean    // true = shown on static/GH-Pages; false = local only; undefined = public (compat)
+  isFavorite?: boolean  // true = sorted to top of lists
   bannerImage?: string  // URL or base64 data URL
   playbookId: string
   heritage: string
@@ -211,6 +213,8 @@ export interface Location {
   notableNpcs?: string[]
   linkedItemIds?: string[]
   bannerImage?: string
+  isPublic?: boolean
+  isFavorite?: boolean
   createdAt: string
   updatedAt: string
 }
@@ -277,6 +281,8 @@ export interface Item {
   description: string
   tags?: string[]
   isCore?: boolean
+  isPublic?: boolean
+  isFavorite?: boolean
   // Where/who has it (optional links)
   heldBy?: string    // characterId
   locationId?: string

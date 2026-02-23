@@ -82,6 +82,9 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useSettingsStore } from '@/stores/settings'
+
+const settingsStore = useSettingsStore()
 
 const props = defineProps<{
   modelValue?: string
@@ -117,18 +120,10 @@ function onFileUpload(event: Event) {
   reader.readAsDataURL(file)
 }
 
-// ── AI generation via Pollinations.ai ────────────────────────────────────────
-function makeUrl(encoded: string, seed: number) {
-  const dims = props.square ? 'width=768&height=768' : `width=1280&height=${height * 2}`
-  return `https://image.pollinations.ai/prompt/${encoded}?${dims}&nologo=true&seed=${seed}&model=flux`
-}
-
-// Fetch image via fetch() → blob → data URL.
-// Gives real HTTP status codes; embeds the image so it stays even if the
-// Pollinations URL eventually changes.
-async function fetchAsDataUrl(url: string): Promise<string> {
+// ── Shared: fetch any URL and return a base64 data URL ────────────────────────
+async function fetchAsDataUrl(url: string, timeoutMs = 90_000): Promise<string> {
   const controller = new AbortController()
-  const timer = setTimeout(() => controller.abort(), 90_000)
+  const timer = setTimeout(() => controller.abort(), timeoutMs)
   try {
     const res = await fetch(url, { signal: controller.signal })
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
@@ -144,27 +139,77 @@ async function fetchAsDataUrl(url: string): Promise<string> {
   }
 }
 
+// ── OpenAI DALL-E 3 ────────────────────────────────────────────────────────────
+async function generateWithOpenAI(prompt: string, apiKey: string): Promise<string> {
+  const size = props.square ? '1024x1024' : '1792x1024'
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), 90_000)
+  try {
+    const res = await fetch('https://api.openai.com/v1/images/generations', {
+      method: 'POST',
+      signal: controller.signal,
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ model: 'dall-e-3', prompt, n: 1, size, quality: 'standard' }),
+    })
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}))
+      throw new Error(err.error?.message ?? `HTTP ${res.status}`)
+    }
+    const data = await res.json()
+    const imageUrl: string = data.data[0].url
+    return await fetchAsDataUrl(imageUrl)
+  } finally {
+    clearTimeout(timer)
+  }
+}
+
+// ── Pollinations.ai (free fallback) ───────────────────────────────────────────
+function makePollinationsUrl(encoded: string, seed: number) {
+  const dims = props.square ? 'width=768&height=768' : `width=1280&height=${height * 2}`
+  return `https://image.pollinations.ai/prompt/${encoded}?${dims}&nologo=true&seed=${seed}&model=flux`
+}
+
+async function generateWithPollinations(encoded: string): Promise<string> {
+  const seed = Math.floor(Math.random() * 99_999)
+  return fetchAsDataUrl(makePollinationsUrl(encoded, seed))
+}
+
+// ── Main generate function ────────────────────────────────────────────────────
 async function generateImage() {
   if (generating.value) return
   genError.value = false
 
   const subject = props.subject || 'fantasy location'
   const desc = props.description ? `. ${props.description.slice(0, 120)}` : ''
-  const stylePrompt = 'Frieren Beyond Journey\'s End anime art style, studio ghibli, soft watercolor illustration, muted cool tones, twilight atmosphere, ancient fantasy world, moonlit palette, misty distant landscape, intricate details, masterpiece quality'
-  const fullPrompt = `${subject}${desc}, ${stylePrompt}`
-  generatingPrompt.value = fullPrompt.slice(0, 80) + '...'
 
+  const openaiKey = settingsStore.openaiKey
+  let fullPrompt: string
+
+  if (openaiKey) {
+    // DALL-E style prompt — more natural language, no model tags
+    fullPrompt = `Studio Ghibli anime art style inspired by Frieren: Beyond Journey's End. Soft watercolor illustration, muted cool tones, twilight atmosphere, ancient fantasy world, moonlit palette, misty landscape. ${subject}${desc}. Highly detailed, masterpiece quality.`
+  } else {
+    // Pollinations style prompt
+    const stylePrompt = 'Frieren Beyond Journey\'s End anime art style, studio ghibli, soft watercolor illustration, muted cool tones, twilight atmosphere, ancient fantasy world, moonlit palette, misty distant landscape, intricate details, masterpiece quality'
+    fullPrompt = `${subject}${desc}, ${stylePrompt}`
+  }
+
+  generatingPrompt.value = (openaiKey ? '[DALL-E 3] ' : '') + fullPrompt.slice(0, 80) + '...'
   generating.value = true
   retrying.value = false
 
-  const encoded = encodeURIComponent(fullPrompt)
-
   for (let attempt = 0; attempt < 2; attempt++) {
     if (attempt === 1) retrying.value = true
-    const seed = Math.floor(Math.random() * 99_999)
-    const url = makeUrl(encoded, seed)
     try {
-      const dataUrl = await fetchAsDataUrl(url)
+      let dataUrl: string
+      if (openaiKey) {
+        dataUrl = await generateWithOpenAI(fullPrompt, openaiKey)
+      } else {
+        dataUrl = await generateWithPollinations(encodeURIComponent(fullPrompt))
+      }
       emit('update:modelValue', dataUrl)
       generating.value = false
       retrying.value = false
@@ -172,7 +217,6 @@ async function generateImage() {
       return
     } catch (err) {
       console.warn(`AI generation attempt ${attempt + 1} failed:`, err)
-      // loop for one retry, then fall through to error state
     }
   }
 

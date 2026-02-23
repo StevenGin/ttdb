@@ -5,6 +5,38 @@
       <p class="text-blades-muted font-mono text-sm mt-1">Data management &amp; deployment</p>
     </div>
 
+    <!-- AI Image Generation -->
+    <div class="blades-card p-4 mb-6 border-blades-occult/20">
+      <h2 class="text-lg mb-1">AI Image Generation</h2>
+      <p class="text-blades-muted font-mono text-xs mb-4">
+        Enter an OpenAI API key to use DALL-E 3 for banner images. Without a key, images
+        are generated via Pollinations.ai (free, no sign-up, but may be slower).
+      </p>
+      <div class="space-y-3">
+        <div>
+          <label class="blades-label">OpenAI API Key</label>
+          <div class="flex gap-2">
+            <input
+              :value="settingsStore.openaiKey"
+              type="password"
+              class="blades-input"
+              placeholder="sk-..."
+              autocomplete="off"
+              @change="settingsStore.setOpenaiKey(($event.target as HTMLInputElement).value.trim())"
+            />
+            <button
+              v-if="settingsStore.openaiKey"
+              class="blades-btn-danger text-xs flex-shrink-0"
+              @click="settingsStore.setOpenaiKey('')"
+            >Clear</button>
+          </div>
+          <div class="mt-1 font-mono text-[10px]" :class="settingsStore.openaiKey ? 'text-emerald-400' : 'text-blades-muted/60'">
+            {{ settingsStore.openaiKey ? '✓ DALL-E 3 active — stored locally, never sent to our servers' : 'No key set — using Pollinations.ai (free)' }}
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Data management -->
     <div class="blades-card p-4 mb-6">
       <h2 class="text-lg mb-4">Data Management</h2>
@@ -103,7 +135,10 @@ import { useLocationsStore } from '@/stores/locations'
 import { useFactionsStore } from '@/stores/factions'
 import { useItemsStore } from '@/stores/items'
 import { useCrewStore } from '@/stores/crew'
+import { useSettingsStore } from '@/stores/settings'
 import type { FactionStatus } from '@/types/blades'
+
+const settingsStore = useSettingsStore()
 
 const charStore = useCharactersStore()
 const locStore = useLocationsStore()

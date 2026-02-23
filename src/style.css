@@ -1,6 +1,109 @@
 /* Google Fonts — Cinzel (display), Playfair Display (body serif), Barlow Condensed (sans), Share Tech Mono */
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Barlow+Condensed:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap');
 
+/* ─── Theme CSS variables ──────────────────────────────────────────────────── */
+/* Values are space-separated RGB triplets so Tailwind's / <alpha-value>        */
+/* syntax (e.g. bg-blades-bg/50) works correctly.                               */
+
+:root,
+[data-theme="dark"] {
+  --c-blades-bg:           24 28 46;
+  --c-blades-surface:      31 35 56;
+  --c-blades-card:         39 45 72;
+  --c-blades-border:       54 61 98;
+  --c-blades-border-light: 85 96 160;
+  --c-blades-text:         221 224 240;
+  --c-blades-muted:        120 128 160;
+  --c-blades-gold:         196 168 101;
+  --c-blades-gold-dim:     106 88 40;
+  --c-blades-gold-light:   224 202 112;
+  --c-blades-red:          94 30 40;
+  --c-blades-red-light:    192 64 80;
+  --c-blades-forest:       28 46 90;
+  --c-blades-sage:         60 90 154;
+  --c-blades-sage-light:   128 144 192;
+  --c-blades-mist:         58 74 120;
+  --c-blades-mist-light:   100 120 176;
+  --c-blades-parchment:    192 190 216;
+  --c-blades-stone:        88 88 120;
+  --c-blades-stone-light:  136 136 168;
+  --c-blades-silver:       200 204 232;
+  --c-blades-silver-dim:   120 120 152;
+  --c-blades-allied:       28 58 96;
+  --c-blades-friendly:     42 80 144;
+  --c-blades-hostile:      122 56 32;
+  --c-blades-war:          110 16 32;
+  --c-blades-spark:        42 60 122;
+  --c-blades-spark-light:  100 116 184;
+  --c-blades-occult:       74 42 122;
+  --c-blades-occult-light: 160 144 216;
+
+  --fog-tl: rgba(28,  46,  90,  0.20);
+  --fog-tr: rgba(74,  42,  122, 0.10);
+  --fog-br: rgba(196, 168, 101, 0.06);
+  --fog-c:  rgba(24,  28,  46,  0.30);
+
+  --glow-gold-a:   rgba(196, 168, 101, 0.65);
+  --glow-gold-b:   rgba(196, 168, 101, 0.20);
+  --glow-amber-a:  rgba(196, 168, 101, 0.55);
+  --glow-amber-b:  rgba(150, 120,  50, 0.20);
+  --glow-silver-a: rgba(200, 204, 232, 0.70);
+  --glow-silver-b: rgba(120, 120, 152, 0.30);
+
+  --scrollbar-track: rgb(31 35 56);
+  --scrollbar-thumb: rgb(85 96 160);
+  --scrollbar-hover: rgb(88 88 120);
+}
+
+[data-theme="light"] {
+  --c-blades-bg:           244 241 232;
+  --c-blades-surface:      237 233 221;
+  --c-blades-card:         231 226 211;
+  --c-blades-border:       200 189 168;
+  --c-blades-border-light: 160 144 128;
+  --c-blades-text:         28 24 16;
+  --c-blades-muted:        90 80 64;
+  --c-blades-gold:         138 104 32;
+  --c-blades-gold-dim:     212 184 120;
+  --c-blades-gold-light:   106 80 16;
+  --c-blades-red:          240 216 216;
+  --c-blades-red-light:    160 48 64;
+  --c-blades-forest:       212 228 248;
+  --c-blades-sage:         40 80 160;
+  --c-blades-sage-light:   24 64 160;
+  --c-blades-mist:         220 232 248;
+  --c-blades-mist-light:   32 80 160;
+  --c-blades-parchment:    106 96 80;
+  --c-blades-stone:        154 144 128;
+  --c-blades-stone-light:  122 112 96;
+  --c-blades-silver:       74 72 64;
+  --c-blades-silver-dim:   138 136 128;
+  --c-blades-allied:       212 232 248;
+  --c-blades-friendly:     184 212 248;
+  --c-blades-hostile:      248 216 200;
+  --c-blades-war:          248 200 200;
+  --c-blades-spark:        216 228 248;
+  --c-blades-spark-light:  40 72 160;
+  --c-blades-occult:       240 232 255;
+  --c-blades-occult-light: 96 64 168;
+
+  --fog-tl: rgba(100, 140, 210, 0.08);
+  --fog-tr: rgba(140, 100, 200, 0.05);
+  --fog-br: rgba(180, 150,  80, 0.06);
+  --fog-c:  rgba(200, 195, 180, 0.15);
+
+  --glow-gold-a:   rgba(138, 104, 32, 0.50);
+  --glow-gold-b:   rgba(138, 104, 32, 0.15);
+  --glow-amber-a:  rgba(138, 104, 32, 0.45);
+  --glow-amber-b:  rgba(100,  80, 20, 0.15);
+  --glow-silver-a: rgba(74,   72, 64, 0.40);
+  --glow-silver-b: rgba(100,  95, 80, 0.20);
+
+  --scrollbar-track: rgb(237 233 221);
+  --scrollbar-thumb: rgb(160 144 128);
+  --scrollbar-hover: rgb(122 112 96);
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -21,9 +124,9 @@
   }
 
   ::-webkit-scrollbar { width: 5px; height: 5px; }
-  ::-webkit-scrollbar-track { @apply bg-blades-surface; }
-  ::-webkit-scrollbar-thumb { @apply bg-blades-border-light rounded; }
-  ::-webkit-scrollbar-thumb:hover { @apply bg-blades-stone; }
+  ::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+  ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 9999px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-hover); }
 }
 
 @layer components {
@@ -137,19 +240,19 @@
   .stress-box.filled { @apply bg-blades-red border-blades-red; }
 
   /* ── Glows (Frieren — moonlight silver, ancient amber, magic blue) ── */
-  .glow-gold   { text-shadow: 0 0 20px rgba(196, 168, 101, 0.65), 0 0 45px rgba(196, 168, 101, 0.2); }
-  .glow-amber  { text-shadow: 0 0 20px rgba(196, 168, 101, 0.55), 0 0 55px rgba(150, 120, 50, 0.2); }
-  .glow-silver { text-shadow: 0 0 20px rgba(200, 204, 232, 0.7),  0 0 50px rgba(120, 120, 152, 0.3); }
-  .glow-green  { text-shadow: 0 0 20px rgba(60, 90, 154, 0.65),   0 0 45px rgba(28, 46, 90, 0.35); }
+  .glow-gold   { text-shadow: 0 0 20px var(--glow-gold-a),   0 0 45px var(--glow-gold-b); }
+  .glow-amber  { text-shadow: 0 0 20px var(--glow-amber-a),  0 0 55px var(--glow-amber-b); }
+  .glow-silver { text-shadow: 0 0 20px var(--glow-silver-a), 0 0 50px var(--glow-silver-b); }
+  .glow-green  { text-shadow: 0 0 20px rgba(60, 90, 154, 0.65), 0 0 45px rgba(28, 46, 90, 0.35); }
 }
 
 /* ── Background atmosphere — Frieren's twilight sky + ancient mist ── */
 .bg-fog {
   background:
-    radial-gradient(ellipse at top left,    rgba(28, 46, 90, 0.20) 0%, transparent 55%),
-    radial-gradient(ellipse at top right,   rgba(74, 42, 122, 0.10) 0%, transparent 45%),
-    radial-gradient(ellipse at bottom right,rgba(196, 168, 101, 0.06) 0%, transparent 60%),
-    radial-gradient(ellipse at center,      rgba(24, 28, 46, 0.30) 0%, transparent 80%);
+    radial-gradient(ellipse at top left,     var(--fog-tl) 0%, transparent 55%),
+    radial-gradient(ellipse at top right,    var(--fog-tr) 0%, transparent 45%),
+    radial-gradient(ellipse at bottom right, var(--fog-br) 0%, transparent 60%),
+    radial-gradient(ellipse at center,       var(--fog-c)  0%, transparent 80%);
 }
 
 /* ── Moonstone texture for cards (subtle silver shimmer) ── */

@@ -24,6 +24,24 @@
 
       <!-- View mode -->
       <div v-if="!editing" class="p-5 space-y-5">
+        <!-- Quick toggles (edit mode only) -->
+        <div v-if="!isStatic" class="flex items-center gap-3">
+          <button
+            class="text-base leading-none transition-colors"
+            :class="loc.isFavorite ? 'text-blades-gold' : 'text-blades-muted/30 hover:text-blades-muted'"
+            :title="loc.isFavorite ? 'Remove from favorites' : 'Add to favorites'"
+            @click="locStore.update(loc.id, { isFavorite: !loc.isFavorite })"
+          >★</button>
+          <button
+            class="font-mono text-xs border rounded px-1.5 py-0.5 transition-colors"
+            :class="loc.isPublic === false
+              ? 'text-blades-muted border-blades-border hover:border-blades-border-light'
+              : 'text-blades-sage-light border-blades-sage/40 hover:border-blades-sage'"
+            :title="loc.isPublic === false ? 'Private — click to make public' : 'Public — click to make private'"
+            @click="locStore.update(loc.id, { isPublic: loc.isPublic === false ? undefined : false })"
+          >{{ loc.isPublic === false ? '🔒 Private' : '🌐 Public' }}</button>
+        </div>
+
         <!-- Breadcrumb -->
         <div v-if="ancestors.length" class="flex items-center gap-1 flex-wrap text-[11px] font-mono text-blades-muted">
           <span v-for="(a, i) in ancestors" :key="a.id">
@@ -127,6 +145,19 @@
           <label class="blades-label">Tags (comma-separated)</label>
           <input v-model="tagsInput" class="blades-input" placeholder="e.g. dangerous, contested, blighted" />
         </div>
+
+        <!-- Public / Favorite toggles -->
+        <div class="flex gap-3 pt-1">
+          <label class="flex items-center gap-2 cursor-pointer select-none">
+            <input type="checkbox" class="accent-blades-gold" v-model="form.isFavorite" />
+            <span class="text-xs font-mono text-blades-muted">★ Favorite</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer select-none">
+            <input type="checkbox" class="accent-blades-sage" :checked="form.isPublic !== false"
+              @change="(e) => form.isPublic = (e.target as HTMLInputElement).checked ? undefined : false" />
+            <span class="text-xs font-mono text-blades-muted">🌐 Public</span>
+          </label>
+        </div>
       </div>
     </template>
 
@@ -206,6 +237,8 @@ function startEdit() {
   if (!loc.value) return
   form.value = { ...loc.value, parentId: loc.value.parentId ?? null }
   tagsInput.value = (loc.value.tags ?? []).join(', ')
+  // Normalize: undefined means public, false means private
+  if (form.value.isPublic !== false) form.value.isPublic = undefined
   editing.value = true
 }
 

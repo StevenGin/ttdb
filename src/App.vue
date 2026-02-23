@@ -53,9 +53,17 @@
         </template>
       </nav>
 
-      <!-- Deploy -->
-      <div v-if="!isStatic" class="p-3 border-t border-blades-border">
-        <button class="blades-btn-outline w-full text-xs py-2" @click="showDeploy = true">
+      <!-- Theme toggle + Deploy -->
+      <div class="p-3 border-t border-blades-border space-y-2">
+        <button
+          class="blades-btn-ghost w-full text-xs py-1.5 flex items-center justify-center gap-2"
+          @click="settings.toggleTheme()"
+          :title="settings.theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
+        >
+          <span>{{ settings.theme === 'dark' ? '☀' : '◗' }}</span>
+          <span>{{ settings.theme === 'dark' ? 'Light Mode' : 'Dark Mode' }}</span>
+        </button>
+        <button v-if="!isStatic" class="blades-btn-outline w-full text-xs py-2" @click="showDeploy = true">
           ↑ Publish to GitHub Pages
         </button>
       </div>
@@ -78,6 +86,7 @@ import { useLocationsStore } from '@/stores/locations'
 import { useFactionsStore } from '@/stores/factions'
 import { useItemsStore } from '@/stores/items'
 import { useCrewStore } from '@/stores/crew'
+import { useSettingsStore } from '@/stores/settings'
 import DeployModal from '@/components/DeployModal.vue'
 import NavSection from '@/components/NavSection.vue'
 
@@ -86,8 +95,10 @@ const isStatic = __STATIC_MODE__
 
 const route = useRoute()
 const showDeploy = ref(false)
+const settings = useSettingsStore()
 
 onMounted(() => {
+  settings.load()
   useCharactersStore().load()
   useLocationsStore().load()
   useFactionsStore().load()

@@ -30,17 +30,60 @@
         </h1>
       </div>
 
-      <button
-        v-if="!isStatic && current?.type !== 'site'"
-        class="blades-btn-ghost text-xs py-1.5"
-        @click="openAdd(currentId)"
-      >
-        + Add {{ current ? LOCATION_TYPE_LABELS[LOCATION_CHILD_TYPE[current.type]!] : 'Region' }}
-      </button>
+      <div class="flex items-center gap-2">
+        <input
+          v-model="searchQuery"
+          class="blades-input max-w-[180px] text-sm"
+          placeholder="Search locations…"
+          @keydown.escape="searchQuery = ''"
+        />
+        <button
+          v-if="!isStatic && current?.type !== 'site' && !searchQuery"
+          class="blades-btn-ghost text-xs py-1.5"
+          @click="openAdd(currentId)"
+        >
+          + Add {{ current ? LOCATION_TYPE_LABELS[LOCATION_CHILD_TYPE[current.type]!] : 'Region' }}
+        </button>
+      </div>
     </div>
 
     <!-- Main body -->
     <div class="flex flex-1 overflow-hidden">
+
+      <!-- ── SEARCH RESULTS (flat list) ──────────────────────────────────── -->
+      <template v-if="searchQuery">
+        <div class="flex-1 overflow-y-auto p-6">
+          <div v-if="searchResults.length === 0" class="text-center text-blades-muted py-8 font-mono text-sm">
+            No locations match "{{ searchQuery }}"
+          </div>
+          <div v-else class="space-y-2">
+            <button
+              v-for="loc in searchResults"
+              :key="loc.id"
+              class="w-full blades-card p-3 flex items-center gap-3 text-left
+                     hover:border-blades-border-light transition-colors"
+              @click="navigateTo(loc.id)"
+            >
+              <span class="text-lg flex-shrink-0">{{ TYPE_ICONS[loc.type] }}</span>
+              <div class="flex-1 min-w-0">
+                <div class="text-sm font-sans text-blades-text">{{ loc.name }}</div>
+                <div class="text-[10px] font-mono text-blades-muted mt-0.5 flex items-center gap-2">
+                  <span>{{ LOCATION_TYPE_LABELS[loc.type] }}</span>
+                  <span v-if="locBreadcrumb(loc.id)">· {{ locBreadcrumb(loc.id) }}</span>
+                </div>
+                <p v-if="loc.description" class="text-blades-muted/70 font-mono text-[10px] mt-0.5 truncate">
+                  {{ loc.description }}
+                </p>
+              </div>
+              <span v-if="loc.isFavorite" class="text-blades-gold text-sm flex-shrink-0">★</span>
+              <span v-if="!isStatic && loc.isPublic === false" class="text-[10px] flex-shrink-0">🔒</span>
+            </button>
+          </div>
+        </div>
+      </template>
+
+      <!-- ── NORMAL HIERARCHICAL VIEW (when no search query) ─────────────── -->
+      <template v-else>
 
       <!-- ── SITE DETAIL VIEW (full-width) ───────────────────────────────── -->
       <template v-if="current?.type === 'site'">
@@ -162,12 +205,26 @@
                 <!-- Dark gradient overlay -->
                 <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent" />
 
-                <!-- Child count -->
-                <div
-                  v-if="childCount(loc.id) > 0"
-                  class="absolute top-2 right-2 bg-black/55 backdrop-blur-sm text-[10px] font-mono
-                         text-blades-muted/90 px-1.5 py-0.5 rounded"
-                >{{ childCount(loc.id) }} ›</div>
+                <!-- Top-right: child count + public/fav -->
+                <div class="absolute top-2 right-2 flex items-center gap-1">
+                  <button
+                    v-if="!isStatic"
+                    class="text-xs leading-none transition-colors bg-black/55 backdrop-blur-sm px-1 py-0.5 rounded"
+                    :class="loc.isFavorite ? 'text-yellow-400' : 'text-white/30 opacity-0 group-hover:opacity-100'"
+                    :title="loc.isFavorite ? 'Remove from favorites' : 'Add to favorites'"
+                    @click.stop="locStore.update(loc.id, { isFavorite: !loc.isFavorite })"
+                  >★</button>
+                  <span
+                    v-if="!isStatic"
+                    class="text-[10px] leading-none bg-black/55 backdrop-blur-sm px-1 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                    :title="loc.isPublic === false ? 'Private' : 'Public'"
+                  >{{ loc.isPublic === false ? '🔒' : '🌐' }}</span>
+                  <div
+                    v-if="childCount(loc.id) > 0"
+                    class="bg-black/55 backdrop-blur-sm text-[10px] font-mono
+                           text-blades-muted/90 px-1.5 py-0.5 rounded"
+                  >{{ childCount(loc.id) }} ›</div>
+                </div>
 
                 <!-- ✦ AI badge -->
                 <button
@@ -249,7 +306,9 @@
             </div>
           </div>
         </Transition>
-      </template>
+      </template><!-- end GRID + INFO PANEL v-else -->
+
+      </template><!-- end NORMAL HIERARCHICAL VIEW v-else -->
     </div>
 
     <!-- Create location modal -->
@@ -303,6 +362,7 @@ import { ref, computed } from 'vue'
 import { useLocationsStore } from '@/stores/locations'
 import { useFactionsStore } from '@/stores/factions'
 import { useCharactersStore } from '@/stores/characters'
+import { useSettingsStore } from '@/stores/settings'
 import type { Location, LocationType } from '@/types/blades'
 import { LOCATION_TYPE_LABELS, LOCATION_CHILD_TYPE } from '@/types/blades'
 import BannerImage from '@/components/BannerImage.vue'
@@ -314,16 +374,57 @@ const isStatic = __STATIC_MODE__
 const locStore = useLocationsStore()
 const facStore = useFactionsStore()
 const charStore = useCharactersStore()
+const settingsStore = useSettingsStore()
 
 // ── Navigation ─────────────────────────────────────────────────────────────
 const currentId = ref<string | null>(null)
+const searchQuery = ref('')
 
 const current = computed(() => (currentId.value ? locStore.get(currentId.value) ?? null : null))
 
-// Children of current location shown in the grid
-const gridItems = computed(() =>
-  locStore.children(currentId.value).sort((a, b) => a.name.localeCompare(b.name))
-)
+// Children of current location shown in the grid (favorites first, private hidden in static)
+const gridItems = computed(() => {
+  let children = locStore.children(currentId.value)
+  if (isStatic) children = children.filter(l => l.isPublic !== false)
+  return children.sort((a, b) => {
+    if (a.isFavorite && !b.isFavorite) return -1
+    if (!a.isFavorite && b.isFavorite) return 1
+    return a.name.localeCompare(b.name)
+  })
+})
+
+// Flat search results across all locations
+const searchResults = computed(() => {
+  const q = searchQuery.value.toLowerCase().trim()
+  if (!q) return []
+  return locStore.locations
+    .filter(l => {
+      if (isStatic && l.isPublic === false) return false
+      return l.name.toLowerCase().includes(q)
+        || l.description?.toLowerCase().includes(q)
+        || l.tags?.some(t => t.toLowerCase().includes(q))
+        || l.notes?.toLowerCase().includes(q)
+    })
+    .sort((a, b) => {
+      if (a.isFavorite && !b.isFavorite) return -1
+      if (!a.isFavorite && b.isFavorite) return 1
+      return a.name.localeCompare(b.name)
+    })
+})
+
+// Breadcrumb string for search result items
+function locBreadcrumb(id: string): string {
+  const ancestors = locStore.ancestors(id)
+  return ancestors.map(a => a.name).join(' › ')
+}
+
+// Navigate to a location and clear search
+function navigateTo(id: string) {
+  searchQuery.value = ''
+  currentId.value = locStore.get(id)?.parentId ?? null
+  // Navigate into the location directly
+  currentId.value = id
+}
 
 // Responsive columns: fewer items = larger cards
 const gridCols = computed(() => {
@@ -356,14 +457,38 @@ const controllingFaction = computed(() =>
   current.value?.controlledBy ? facStore.get(current.value.controlledBy) ?? null : null
 )
 
-// ── AI banner ──────────────────────────────────────────────────────────────
-function generateBanner(loc: Location) {
-  const style = 'studio ghibli anime style, Frieren aesthetic, soft watercolor illustration, fantasy atmosphere'
-  const prompt = `${loc.name}, ${LOCATION_TYPE_LABELS[loc.type]} in a dark fantasy city, ${loc.description?.slice(0, 80) ?? ''}, ${style}`
-  const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=512&height=512&nologo=true&seed=${Math.floor(Math.random() * 9999)}&model=flux`
-  const img = new Image()
-  img.onload = () => locStore.update(loc.id, { bannerImage: url })
-  img.src = url
+// ── AI banner (grid cards) ─────────────────────────────────────────────────
+async function generateBanner(loc: Location) {
+  const desc = loc.description?.slice(0, 80) ?? ''
+  const apiKey = settingsStore.openaiKey
+  let dataUrl: string
+  if (apiKey) {
+    const prompt = `Studio Ghibli anime art style, Frieren: Beyond Journey's End aesthetic. ${loc.name}, ${LOCATION_TYPE_LABELS[loc.type]} in an ancient dark fantasy city. ${desc} Soft watercolor, twilight atmosphere, highly detailed.`
+    const res = await fetch('https://api.openai.com/v1/images/generations', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'dall-e-3', prompt, n: 1, size: '1024x1024', quality: 'standard' }),
+    })
+    if (!res.ok) return
+    const data = await res.json()
+    const imgRes = await fetch(data.data[0].url)
+    if (!imgRes.ok) return
+    const blob = await imgRes.blob()
+    dataUrl = await new Promise<string>(resolve => {
+      const r = new FileReader(); r.onload = () => resolve(r.result as string); r.readAsDataURL(blob)
+    })
+  } else {
+    const style = 'studio ghibli anime style, Frieren aesthetic, soft watercolor illustration, fantasy atmosphere'
+    const prompt = `${loc.name}, ${LOCATION_TYPE_LABELS[loc.type]} in a dark fantasy city, ${desc}, ${style}`
+    const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=512&height=512&nologo=true&seed=${Math.floor(Math.random() * 9999)}&model=flux`
+    const imgRes = await fetch(url)
+    if (!imgRes.ok) return
+    const blob = await imgRes.blob()
+    dataUrl = await new Promise<string>(resolve => {
+      const r = new FileReader(); r.onload = () => resolve(r.result as string); r.readAsDataURL(blob)
+    })
+  }
+  locStore.update(loc.id, { bannerImage: dataUrl })
 }
 
 // ── Type icons ─────────────────────────────────────────────────────────────

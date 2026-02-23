@@ -5,48 +5,39 @@ export default {
     extend: {
       colors: {
         // Aurelion — Frieren: Beyond Journey's End palette
-        // Cool midnight blue, moon-silver, ancient amber, twilight slate
+        // All colors reference CSS variables so dark/light themes work.
+        // Variables are defined in style.css under :root (dark) and [data-theme="light"].
         blades: {
-          // Backgrounds — Frieren's soft twilight (lifted for readability)
-          bg:           '#181c2e',   // deep slate-blue (lighter than midnight)
-          surface:      '#1f2338',   // twilight navy
-          card:         '#272d48',   // slate-indigo card
-          // Borders — more visible against lifted backgrounds
-          border:       '#363d62',   // slate border
-          'border-light': '#5560a0', // medium violet-slate
-          // Text — moonlight and parchment
-          text:         '#dde0f0',   // cool moonlight silver-white
-          muted:        '#7880a0',   // lavender-gray dust
-          // Gold / Amber — ancient rune magic, campfire warmth
-          gold:         '#c4a865',   // ancient amber rune-gold
-          'gold-dim':   '#6a5828',   // dark amber
-          'gold-light': '#e0ca70',   // bright rune-gold
-          // Red / Danger
-          red:          '#5e1e28',   // dark crimson
-          'red-light':  '#c04050',   // bright crimson
-          // Blues — Frieren's world (replaces greens)
-          forest:       '#1c2e5a',   // deep dusk-blue
-          sage:         '#3c5a9a',   // muted cornflower-blue
-          'sage-light': '#8090c0',   // periwinkle mist
-          // Night mist
-          mist:         '#3a4a78',   // night-mist blue
-          'mist-light': '#6478b0',   // twilight blue
-          // Stone & parchment — touched by moonlight
-          parchment:    '#c0bed8',   // moon-parchment
-          stone:        '#585878',   // blue-stone
-          'stone-light': '#8888a8',  // light moon-stone
-          // Silver — Frieren's signature
-          silver:       '#c8cce8',   // Frieren's silver-hair light
-          'silver-dim': '#787898',   // muted moonsilver
-          // Compat palette — shifted to cooler tones
-          allied:       '#1c3a60',
-          friendly:     '#2a5090',
-          hostile:      '#7a3820',
-          war:          '#6e1020',
-          spark:        '#2a3c7a',
-          'spark-light': '#6474b8',
-          occult:       '#4a2a7a',   // Frieren's ancient magic — deep purple
-          'occult-light': '#a090d8',
+          bg:             'rgb(var(--c-blades-bg)           / <alpha-value>)',
+          surface:        'rgb(var(--c-blades-surface)      / <alpha-value>)',
+          card:           'rgb(var(--c-blades-card)         / <alpha-value>)',
+          border:         'rgb(var(--c-blades-border)       / <alpha-value>)',
+          'border-light': 'rgb(var(--c-blades-border-light) / <alpha-value>)',
+          text:           'rgb(var(--c-blades-text)         / <alpha-value>)',
+          muted:          'rgb(var(--c-blades-muted)        / <alpha-value>)',
+          gold:           'rgb(var(--c-blades-gold)         / <alpha-value>)',
+          'gold-dim':     'rgb(var(--c-blades-gold-dim)     / <alpha-value>)',
+          'gold-light':   'rgb(var(--c-blades-gold-light)   / <alpha-value>)',
+          red:            'rgb(var(--c-blades-red)          / <alpha-value>)',
+          'red-light':    'rgb(var(--c-blades-red-light)    / <alpha-value>)',
+          forest:         'rgb(var(--c-blades-forest)       / <alpha-value>)',
+          sage:           'rgb(var(--c-blades-sage)         / <alpha-value>)',
+          'sage-light':   'rgb(var(--c-blades-sage-light)   / <alpha-value>)',
+          mist:           'rgb(var(--c-blades-mist)         / <alpha-value>)',
+          'mist-light':   'rgb(var(--c-blades-mist-light)   / <alpha-value>)',
+          parchment:      'rgb(var(--c-blades-parchment)    / <alpha-value>)',
+          stone:          'rgb(var(--c-blades-stone)        / <alpha-value>)',
+          'stone-light':  'rgb(var(--c-blades-stone-light)  / <alpha-value>)',
+          silver:         'rgb(var(--c-blades-silver)       / <alpha-value>)',
+          'silver-dim':   'rgb(var(--c-blades-silver-dim)   / <alpha-value>)',
+          allied:         'rgb(var(--c-blades-allied)       / <alpha-value>)',
+          friendly:       'rgb(var(--c-blades-friendly)     / <alpha-value>)',
+          hostile:        'rgb(var(--c-blades-hostile)      / <alpha-value>)',
+          war:            'rgb(var(--c-blades-war)          / <alpha-value>)',
+          spark:          'rgb(var(--c-blades-spark)        / <alpha-value>)',
+          'spark-light':  'rgb(var(--c-blades-spark-light)  / <alpha-value>)',
+          occult:         'rgb(var(--c-blades-occult)       / <alpha-value>)',
+          'occult-light': 'rgb(var(--c-blades-occult-light) / <alpha-value>)',
         },
       },
       fontFamily: {

@@ -26,11 +26,29 @@
       <div class="p-5 space-y-5">
         <!-- View mode -->
         <template v-if="!editing">
-          <!-- Role badge + faction -->
-          <div class="flex flex-wrap gap-2 items-center">
-            <span v-if="npc.role" class="blades-badge-gold text-xs">{{ npc.role }}</span>
-            <span v-if="factionName" class="blades-badge-muted text-xs">⚑ {{ factionName }}</span>
-            <span v-if="locationName" class="blades-badge-muted text-xs">◬ {{ locationName }}</span>
+          <!-- Role badge + faction + public/fav indicators -->
+          <div class="flex flex-wrap gap-2 items-center justify-between">
+            <div class="flex flex-wrap gap-2 items-center">
+              <span v-if="npc.role" class="blades-badge-gold text-xs">{{ npc.role }}</span>
+              <span v-if="factionName" class="blades-badge-muted text-xs">⚑ {{ factionName }}</span>
+              <span v-if="locationName" class="blades-badge-muted text-xs">◬ {{ locationName }}</span>
+            </div>
+            <div v-if="!isStatic" class="flex items-center gap-2">
+              <button
+                class="text-base leading-none transition-colors"
+                :class="npc.isFavorite ? 'text-blades-gold' : 'text-blades-muted/30 hover:text-blades-muted'"
+                :title="npc.isFavorite ? 'Remove from favorites' : 'Add to favorites'"
+                @click="save({ isFavorite: !npc.isFavorite })"
+              >★</button>
+              <button
+                class="font-mono text-xs border rounded px-1.5 py-0.5 transition-colors"
+                :class="npc.isPublic === false
+                  ? 'text-blades-muted border-blades-border hover:border-blades-border-light'
+                  : 'text-blades-sage-light border-blades-sage/40 hover:border-blades-sage'"
+                :title="npc.isPublic === false ? 'Private — click to make public' : 'Public — click to make private'"
+                @click="save({ isPublic: npc.isPublic === false ? undefined : false })"
+              >{{ npc.isPublic === false ? '🔒 Private' : '🌐 Public' }}</button>
+            </div>
           </div>
 
           <!-- Description -->
@@ -98,6 +116,19 @@
               <textarea v-model="draft.notes" class="blades-textarea" rows="3"
                 placeholder="Secrets, hooks, relationships..." />
             </div>
+
+            <!-- Public / Favorite toggles -->
+            <div class="flex gap-3 pt-1">
+              <label class="flex items-center gap-2 cursor-pointer select-none">
+                <input type="checkbox" class="accent-blades-gold" v-model="draft.isFavorite" />
+                <span class="text-xs font-mono text-blades-muted">★ Favorite</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer select-none">
+                <input type="checkbox" class="accent-blades-sage" :checked="draft.isPublic !== false"
+                  @change="(e) => draft.isPublic = (e.target as HTMLInputElement).checked ? undefined : false" />
+                <span class="text-xs font-mono text-blades-muted">🌐 Public</span>
+              </label>
+            </div>
           </div>
         </template>
       </div>
@@ -126,6 +157,9 @@ import { useCharactersStore } from '@/stores/characters'
 import { useFactionsStore } from '@/stores/factions'
 import { useLocationsStore } from '@/stores/locations'
 import type { Character, Location } from '@/types/blades'
+
+declare const __STATIC_MODE__: boolean
+const isStatic = __STATIC_MODE__
 
 const props = defineProps<{
   open: boolean

@@ -17,6 +17,18 @@
         <option value="2">2 — Heavy</option>
         <option value="3">3 — Very heavy</option>
       </select>
+      <button
+        v-if="!isStatic"
+        class="blades-btn-ghost text-xs py-1.5 px-3"
+        :class="{ 'border-blades-gold text-blades-gold': showFavoritesOnly }"
+        @click="showFavoritesOnly = !showFavoritesOnly"
+        title="Show favorites only"
+      >★ Favorites</button>
+      <button
+        v-if="search || filterLoad || showFavoritesOnly"
+        class="blades-btn-ghost text-xs"
+        @click="search = ''; filterLoad = ''; showFavoritesOnly = false"
+      >Clear</button>
     </div>
 
     <div v-if="store.items.length === 0" class="text-center py-24">
@@ -62,7 +74,21 @@
         </div>
 
         <!-- Actions -->
-        <div v-if="!isStatic" class="flex gap-1 flex-shrink-0">
+        <div v-if="!isStatic" class="flex gap-1 flex-shrink-0 items-center">
+          <button
+            class="text-base leading-none transition-colors py-0.5 px-1"
+            :class="item.isFavorite ? 'text-blades-gold' : 'text-blades-muted/30 hover:text-blades-muted'"
+            :title="item.isFavorite ? 'Remove from favorites' : 'Add to favorites'"
+            @click="store.update(item.id, { isFavorite: !item.isFavorite })"
+          >★</button>
+          <button
+            class="font-mono text-[10px] border rounded px-1 py-0.5 transition-colors leading-none"
+            :class="item.isPublic === false
+              ? 'text-blades-muted/40 border-blades-border hover:border-blades-border-light'
+              : 'text-blades-sage-light/60 border-blades-sage/30 hover:border-blades-sage'"
+            :title="item.isPublic === false ? 'Private — click to make public' : 'Public — click to make private'"
+            @click="store.update(item.id, { isPublic: item.isPublic === false ? undefined : false })"
+          >{{ item.isPublic === false ? '🔒' : '🌐' }}</button>
           <button class="blades-btn-ghost text-xs py-0.5 px-2" @click="openEdit(item.id)">Edit</button>
           <button class="blades-btn-danger text-xs py-0.5 px-2" @click="del(item.id)">✕</button>
         </div>
@@ -113,6 +139,16 @@
             </div>
           </div>
         </div>
+        <div class="flex gap-4 mt-1">
+          <label class="flex items-center gap-2 cursor-pointer select-none">
+            <input type="checkbox" class="accent-blades-gold" v-model="formFavorite" />
+            <span class="text-xs font-mono text-blades-muted">★ Favorite</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer select-none">
+            <input type="checkbox" class="accent-blades-sage" v-model="formPublic" />
+            <span class="text-xs font-mono text-blades-muted">🌐 Public</span>
+          </label>
+        </div>
         <div class="flex gap-2 mt-4">
           <button class="blades-btn-gold text-xs" @click="submit">{{ editId ? 'Save' : 'Create' }}</button>
           <button class="blades-btn-ghost text-xs" @click="showForm = false">Cancel</button>
@@ -138,13 +174,24 @@ const locStore = useLocationsStore()
 
 const search = ref('')
 const filterLoad = ref('')
+const showFavoritesOnly = ref(false)
 
-const filtered = computed(() => store.items.filter(i => {
-  if (search.value && !i.name.toLowerCase().includes(search.value.toLowerCase()) &&
-      !i.description?.toLowerCase().includes(search.value.toLowerCase())) return false
-  if (filterLoad.value && i.load !== Number(filterLoad.value)) return false
-  return true
-}))
+const filtered = computed(() => {
+  const q = search.value.toLowerCase()
+  const list = store.items.filter(i => {
+    if (isStatic && i.isPublic === false) return false
+    if (q && !i.name.toLowerCase().includes(q) && !i.description?.toLowerCase().includes(q)
+           && !i.tags?.some(t => t.toLowerCase().includes(q))) return false
+    if (filterLoad.value && i.load !== Number(filterLoad.value)) return false
+    if (showFavoritesOnly.value && !i.isFavorite) return false
+    return true
+  })
+  return list.sort((a, b) => {
+    if (a.isFavorite && !b.isFavorite) return -1
+    if (!a.isFavorite && b.isFavorite) return 1
+    return a.name.localeCompare(b.name)
+  })
+})
 
 function charName(id: string) { return charStore.get(id)?.name ?? id }
 function locName(id: string) { return locStore.get(id)?.name ?? id }
@@ -160,11 +207,15 @@ const showForm = ref(false)
 const editId = ref<string | null>(null)
 const tagsInput = ref('')
 const form = ref<Partial<Item>>({})
+const formFavorite = ref(false)
+const formPublic = ref(true)
 
 function openAdd() {
   editId.value = null
   tagsInput.value = ''
   form.value = { name: '', load: 1, description: '' }
+  formFavorite.value = false
+  formPublic.value = true
   showForm.value = true
 }
 
@@ -174,13 +225,22 @@ function openEdit(id: string) {
   editId.value = id
   tagsInput.value = (item.tags ?? []).join(', ')
   form.value = { ...item }
+  formFavorite.value = !!item.isFavorite
+  formPublic.value = item.isPublic !== false
   showForm.value = true
 }
 
 function submit() {
   if (!form.value.name?.trim()) return
   const tags = tagsInput.value ? tagsInput.value.split(',').map(t => t.trim()).filter(Boolean) : undefined
-  const data = { ...form.value, tags, heldBy: form.value.heldBy || undefined, locationId: form.value.locationId || undefined }
+  const data = {
+    ...form.value,
+    tags,
+    heldBy: form.value.heldBy || undefined,
+    locationId: form.value.locationId || undefined,
+    isFavorite: formFavorite.value || undefined,
+    isPublic: formPublic.value ? undefined : false,
+  }
   if (editId.value) {
     store.update(editId.value, data)
   } else {

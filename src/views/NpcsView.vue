@@ -27,9 +27,16 @@
         >{{ f.name }}</option>
       </select>
       <button
-        v-if="search || factionFilter"
+        v-if="!isStatic"
+        class="blades-btn-ghost text-xs py-1.5 px-3"
+        :class="{ 'border-blades-gold text-blades-gold': showFavoritesOnly }"
+        @click="showFavoritesOnly = !showFavoritesOnly"
+        title="Show favorites only"
+      >★ Favorites</button>
+      <button
+        v-if="search || factionFilter || showFavoritesOnly"
         class="blades-btn-ghost text-xs"
-        @click="search = ''; factionFilter = ''"
+        @click="search = ''; factionFilter = ''; showFavoritesOnly = false"
       >Clear</button>
     </div>
 
@@ -65,12 +72,33 @@
         </div>
 
         <div class="p-4">
-          <!-- Role / NPC badge -->
+          <!-- Role / NPC badge + favorite + public -->
           <div class="flex items-center justify-between mb-2">
-            <span v-if="ch.role" class="blades-badge-gold text-xs">{{ ch.role }}</span>
-            <span v-else class="blades-badge-muted text-xs">NPC</span>
-            <span v-if="factionName(ch)" class="text-[10px] font-mono text-blades-muted">⚑ {{ factionName(ch) }}</span>
+            <div class="flex items-center gap-1.5 min-w-0">
+              <span v-if="ch.role" class="blades-badge-gold text-xs truncate">{{ ch.role }}</span>
+              <span v-else class="blades-badge-muted text-xs">NPC</span>
+            </div>
+            <div class="flex items-center gap-1.5 flex-shrink-0" @click.stop>
+              <!-- Favorite toggle -->
+              <button
+                v-if="!isStatic"
+                class="text-sm leading-none transition-colors"
+                :class="ch.isFavorite ? 'text-blades-gold' : 'text-blades-muted/30 hover:text-blades-muted'"
+                :title="ch.isFavorite ? 'Remove from favorites' : 'Add to favorites'"
+                @click.stop="store.update(ch.id, { isFavorite: !ch.isFavorite })"
+              >★</button>
+              <!-- Public badge -->
+              <span
+                v-if="!isStatic"
+                class="text-[10px] font-mono leading-none"
+                :class="ch.isPublic === false ? 'text-blades-muted/40' : 'text-blades-sage-light/60'"
+                :title="ch.isPublic === false ? 'Private — not published' : 'Public — visible on GitHub Pages'"
+              >{{ ch.isPublic === false ? '🔒' : '🌐' }}</span>
+            </div>
           </div>
+
+          <!-- Faction -->
+          <div v-if="factionName(ch)" class="text-[10px] font-mono text-blades-muted mb-1">⚑ {{ factionName(ch) }}</div>
 
           <!-- Name -->
           <h3 class="text-xl font-serif font-semibold text-blades-text group-hover:text-blades-gold transition-colors mb-0.5">
@@ -111,19 +139,32 @@ const facStore = useFactionsStore()
 
 const search = ref('')
 const factionFilter = ref('')
+const showFavoritesOnly = ref(false)
 
-const allNpcs = computed(() => store.characters.filter(c => c.isNpc === true))
+const allNpcs = computed(() => {
+  const npcs = store.characters.filter(c => c.isNpc === true)
+  // In static mode, hide private NPCs
+  if (isStatic) return npcs.filter(c => c.isPublic !== false)
+  return npcs
+})
 
 const filteredNpcs = computed(() => {
   const q = search.value.toLowerCase().trim()
-  return allNpcs.value.filter(c => {
+  const list = allNpcs.value.filter(c => {
     const matchesSearch = !q
       || c.name.toLowerCase().includes(q)
       || c.alias?.toLowerCase().includes(q)
       || c.role?.toLowerCase().includes(q)
       || c.description?.toLowerCase().includes(q)
     const matchesFaction = !factionFilter.value || c.factionId === factionFilter.value
-    return matchesSearch && matchesFaction
+    const matchesFav = !showFavoritesOnly.value || c.isFavorite
+    return matchesSearch && matchesFaction && matchesFav
+  })
+  // Favorites first, then alphabetical
+  return list.sort((a, b) => {
+    if (a.isFavorite && !b.isFavorite) return -1
+    if (!a.isFavorite && b.isFavorite) return 1
+    return a.name.localeCompare(b.name)
   })
 })
 
