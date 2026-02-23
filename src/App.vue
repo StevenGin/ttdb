@@ -20,6 +20,11 @@
 
       <!-- Nav -->
       <nav class="flex-1 p-2 pt-3 space-y-0.5 overflow-y-auto">
+        <!-- Quick Start -->
+        <RouterLink to="/welcome" class="nav-link" :class="{ active: route.path === '/welcome' }">
+          <span class="nav-icon">✦</span> Quick Start
+        </RouterLink>
+
         <!-- The Crew -->
         <NavSection label="The Crew" />
         <RouterLink to="/crew" class="nav-link" :class="{ active: route.path === '/crew' }">

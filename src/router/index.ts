@@ -3,7 +3,8 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 declare const __STATIC_MODE__: boolean
 
 const routes = [
-  { path: '/', redirect: '/crew' },
+  { path: '/', redirect: '/welcome' },
+  { path: '/welcome', component: () => import('@/views/WelcomeView.vue') },
   { path: '/characters', component: () => import('@/views/CharactersView.vue') },
   { path: '/characters/:id', component: () => import('@/views/CharacterDetailView.vue') },
   { path: '/npcs', component: () => import('@/views/NpcsView.vue') },
@@ -14,7 +15,7 @@ const routes = [
   ...(__STATIC_MODE__
     ? []
     : [{ path: '/settings', component: () => import('@/views/SettingsView.vue') }]),
-  { path: '/:pathMatch(.*)*', redirect: '/crew' },
+  { path: '/:pathMatch(.*)*', redirect: '/welcome' },
 ]
 
 export const router = createRouter({

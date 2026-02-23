@@ -56,52 +56,54 @@
 }
 
 [data-theme="light"] {
-  --c-blades-bg:           244 241 232;
-  --c-blades-surface:      237 233 221;
-  --c-blades-card:         231 226 211;
-  --c-blades-border:       200 189 168;
-  --c-blades-border-light: 160 144 128;
-  --c-blades-text:         28 24 16;
-  --c-blades-muted:        90 80 64;
-  --c-blades-gold:         138 104 32;
-  --c-blades-gold-dim:     212 184 120;
-  --c-blades-gold-light:   106 80 16;
-  --c-blades-red:          240 216 216;
-  --c-blades-red-light:    160 48 64;
-  --c-blades-forest:       212 228 248;
-  --c-blades-sage:         40 80 160;
-  --c-blades-sage-light:   24 64 160;
-  --c-blades-mist:         220 232 248;
-  --c-blades-mist-light:   32 80 160;
-  --c-blades-parchment:    106 96 80;
-  --c-blades-stone:        154 144 128;
-  --c-blades-stone-light:  122 112 96;
-  --c-blades-silver:       74 72 64;
-  --c-blades-silver-dim:   138 136 128;
-  --c-blades-allied:       212 232 248;
-  --c-blades-friendly:     184 212 248;
-  --c-blades-hostile:      248 216 200;
-  --c-blades-war:          248 200 200;
-  --c-blades-spark:        216 228 248;
-  --c-blades-spark-light:  40 72 160;
-  --c-blades-occult:       240 232 255;
-  --c-blades-occult-light: 96 64 168;
+  /* ── Aged parchment palette — like a campaign journal left in firelight ── */
+  --c-blades-bg:           220 210 182;   /* worn parchment */
+  --c-blades-surface:      210 199 170;   /* slightly darker vellum */
+  --c-blades-card:         202 190 158;   /* aged paper */
+  --c-blades-border:       174 155 116;   /* tanned leather binding */
+  --c-blades-border-light: 142 120 84;    /* weathered strap */
+  --c-blades-text:         24 20 12;      /* iron-gall ink */
+  --c-blades-muted:        80 66 44;      /* faded ink */
+  --c-blades-gold:         118 82 14;     /* amber seal wax */
+  --c-blades-gold-dim:     192 162 82;    /* ochre highlight */
+  --c-blades-gold-light:   88 58 8;       /* dark amber */
+  --c-blades-red:          228 194 174;   /* terracotta wash */
+  --c-blades-red-light:    152 38 54;     /* crimson ink */
+  --c-blades-forest:       194 212 234;   /* dusty periwinkle */
+  --c-blades-sage:         52 88 158;     /* faded blue */
+  --c-blades-sage-light:   38 74 152;     /* deeper faded blue */
+  --c-blades-mist:         206 220 240;   /* pale blue wash */
+  --c-blades-mist-light:   42 82 156;     /* mid blue */
+  --c-blades-parchment:    98 84 60;      /* sepia ink */
+  --c-blades-stone:        142 124 98;    /* warm stone */
+  --c-blades-stone-light:  112 96 72;     /* darker stone */
+  --c-blades-silver:       64 56 42;      /* aged pewter */
+  --c-blades-silver-dim:   128 114 92;    /* brushed pewter */
+  --c-blades-allied:       194 216 238;
+  --c-blades-friendly:     170 200 236;
+  --c-blades-hostile:      238 204 182;
+  --c-blades-war:          236 188 184;
+  --c-blades-spark:        204 218 240;
+  --c-blades-spark-light:  50 80 158;
+  --c-blades-occult:       230 218 245;
+  --c-blades-occult-light: 90 58 162;
 
-  --fog-tl: rgba(100, 140, 210, 0.08);
-  --fog-tr: rgba(140, 100, 200, 0.05);
-  --fog-br: rgba(180, 150,  80, 0.06);
-  --fog-c:  rgba(200, 195, 180, 0.15);
+  /* Firelit parchment atmosphere */
+  --fog-tl: rgba(180, 148, 72,  0.12);
+  --fog-tr: rgba(158, 112, 48,  0.08);
+  --fog-br: rgba(118,  90, 38,  0.10);
+  --fog-c:  rgba(210, 192, 148, 0.28);
 
-  --glow-gold-a:   rgba(138, 104, 32, 0.50);
-  --glow-gold-b:   rgba(138, 104, 32, 0.15);
-  --glow-amber-a:  rgba(138, 104, 32, 0.45);
-  --glow-amber-b:  rgba(100,  80, 20, 0.15);
-  --glow-silver-a: rgba(74,   72, 64, 0.40);
-  --glow-silver-b: rgba(100,  95, 80, 0.20);
+  --glow-gold-a:   rgba(118, 82, 14, 0.55);
+  --glow-gold-b:   rgba(118, 82, 14, 0.20);
+  --glow-amber-a:  rgba(118, 82, 14, 0.50);
+  --glow-amber-b:  rgba( 90, 60, 10, 0.18);
+  --glow-silver-a: rgba( 64, 56, 42, 0.45);
+  --glow-silver-b: rgba(100, 88, 68, 0.25);
 
-  --scrollbar-track: rgb(237 233 221);
-  --scrollbar-thumb: rgb(160 144 128);
-  --scrollbar-hover: rgb(122 112 96);
+  --scrollbar-track: rgb(210 199 170);
+  --scrollbar-thumb: rgb(142 120 84);
+  --scrollbar-hover: rgb(112 96 72);
 }
 
 @tailwind base;
