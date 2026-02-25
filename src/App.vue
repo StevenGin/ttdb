@@ -5,13 +5,19 @@
       <!-- Logo -->
       <div class="p-4 border-b border-blades-border">
         <div class="flex items-center gap-2">
-          <div class="w-8 h-8 bg-blades-gold/10 border border-blades-gold-dim flex items-center justify-center rounded-sm">
+          <div class="w-8 h-8 bg-blades-gold/10 border border-blades-gold-dim flex items-center justify-center rounded-sm flex-shrink-0">
             <span class="text-blades-gold font-serif text-sm">✦</span>
           </div>
-          <div>
+          <div class="flex-1 min-w-0">
             <div class="text-blades-gold font-serif font-bold text-sm uppercase tracking-widest glow-amber">Aurelion</div>
             <div class="text-blades-muted font-mono text-[10px]">Blades in the Dark</div>
           </div>
+          <!-- Theme toggle icon — small, top-right of logo block -->
+          <button
+            class="flex-shrink-0 w-6 h-6 flex items-center justify-center text-blades-muted hover:text-blades-text transition-colors rounded-sm hover:bg-blades-border/30 text-sm leading-none"
+            :title="settings.theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
+            @click="settings.toggleTheme()"
+          >{{ settings.theme === 'dark' ? '☀' : '◗' }}</button>
         </div>
         <div v-if="isStatic" class="mt-2 text-[10px] font-mono text-blades-muted border border-blades-border px-2 py-1 text-center rounded-sm">
           ◆ READ-ONLY
@@ -48,6 +54,9 @@
         <RouterLink to="/items" class="nav-link" :class="{ active: route.path === '/items' }">
           <span class="nav-icon">◇</span> Items
         </RouterLink>
+        <RouterLink to="/journal" class="nav-link" :class="{ active: route.path === '/journal' }">
+          <span class="nav-icon">✎</span> Journal
+        </RouterLink>
 
         <!-- System -->
         <template v-if="!isStatic">
@@ -58,17 +67,9 @@
         </template>
       </nav>
 
-      <!-- Theme toggle + Deploy -->
-      <div class="p-3 border-t border-blades-border space-y-2">
-        <button
-          class="blades-btn-ghost w-full text-xs py-1.5 flex items-center justify-center gap-2"
-          @click="settings.toggleTheme()"
-          :title="settings.theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
-        >
-          <span>{{ settings.theme === 'dark' ? '☀' : '◗' }}</span>
-          <span>{{ settings.theme === 'dark' ? 'Light Mode' : 'Dark Mode' }}</span>
-        </button>
-        <button v-if="!isStatic" class="blades-btn-outline w-full text-xs py-2" @click="showDeploy = true">
+      <!-- Deploy button -->
+      <div v-if="!isStatic" class="p-3 border-t border-blades-border">
+        <button class="blades-btn-outline w-full text-xs py-2" @click="showDeploy = true">
           ↑ Publish to GitHub Pages
         </button>
       </div>
@@ -92,6 +93,7 @@ import { useFactionsStore } from '@/stores/factions'
 import { useItemsStore } from '@/stores/items'
 import { useCrewStore } from '@/stores/crew'
 import { useSettingsStore } from '@/stores/settings'
+import { useJournalStore } from '@/stores/journal'
 import DeployModal from '@/components/DeployModal.vue'
 import NavSection from '@/components/NavSection.vue'
 
@@ -109,5 +111,6 @@ onMounted(() => {
   useFactionsStore().load()
   useItemsStore().load()
   useCrewStore().load()
+  useJournalStore().load()
 })
 </script>

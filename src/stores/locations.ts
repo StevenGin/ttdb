@@ -85,7 +85,7 @@ export const useLocationsStore = defineStore('locations', () => {
     return [...kids, ...kids.flatMap(k => descendants(k.id))]
   }
 
-  const typeOrder: LocationType[] = ['world', 'city', 'district', 'area', 'site', 'room', 'other']
+  const typeOrder: LocationType[] = ['region', 'city', 'district', 'site']
   function typeRank(t: LocationType) { return typeOrder.indexOf(t) }
 
   function resetToAurelion() {

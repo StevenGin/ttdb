@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type { Character, ActionRatings } from '@/types/blades'
+import { buildAurelionNpcs } from '@/data/aurelion'
 
 const KEY = 'ttdb_characters'
 
@@ -18,8 +19,21 @@ export const useCharactersStore = defineStore('characters', () => {
   function load() {
     try {
       const raw = localStorage.getItem(KEY)
-      if (raw) characters.value = JSON.parse(raw)
+      if (raw) {
+        characters.value = JSON.parse(raw)
+        return
+      }
     } catch { console.warn('Failed to load characters') }
+    // First run: seed with Aurelion world NPCs
+    characters.value = buildAurelionNpcs()
+    save()
+  }
+
+  function seedAurelionNpcs() {
+    const seedIds = new Set(buildAurelionNpcs().map(n => n.id))
+    const filtered = characters.value.filter(c => !seedIds.has(c.id))
+    characters.value = [...filtered, ...buildAurelionNpcs()]
+    save()
   }
 
   function save() {
@@ -67,5 +81,5 @@ export const useCharactersStore = defineStore('characters', () => {
 
   function exportSnapshot() { return characters.value }
 
-  return { characters, load, create, update, remove, get, exportSnapshot }
+  return { characters, load, create, update, remove, get, exportSnapshot, seedAurelionNpcs }
 })

@@ -16,7 +16,7 @@
     </div>
 
     <!-- ── Quick Navigation ─────────────────────────────────────────────────── -->
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
       <a href="#the-world" class="blades-card p-4 text-center hover:border-blades-gold/40 transition-colors cursor-pointer">
         <div class="text-2xl mb-2">🌍</div>
         <div class="text-xs font-serif text-blades-gold uppercase tracking-wider">The World</div>
@@ -27,13 +27,18 @@
         <div class="text-xs font-serif text-blades-gold uppercase tracking-wider">The City</div>
         <div class="text-[10px] font-mono text-blades-muted mt-1">Districts &amp; tiers</div>
       </a>
+      <a href="#notable-figures" class="blades-card p-4 text-center hover:border-blades-gold/40 transition-colors cursor-pointer">
+        <div class="text-2xl mb-2">◈</div>
+        <div class="text-xs font-serif text-blades-gold uppercase tracking-wider">Key People</div>
+        <div class="text-[10px] font-mono text-blades-muted mt-1">Faction heads &amp; contacts</div>
+      </a>
       <a href="#the-game" class="blades-card p-4 text-center hover:border-blades-gold/40 transition-colors cursor-pointer">
         <div class="text-2xl mb-2">🎲</div>
         <div class="text-xs font-serif text-blades-gold uppercase tracking-wider">The Rules</div>
         <div class="text-[10px] font-mono text-blades-muted mt-1">BiTD primer</div>
       </a>
       <a href="#using-this-app" class="blades-card p-4 text-center hover:border-blades-gold/40 transition-colors cursor-pointer">
-        <div class="text-2xl mb-2">◈</div>
+        <div class="text-2xl mb-2">⚙</div>
         <div class="text-xs font-serif text-blades-gold uppercase tracking-wider">This App</div>
         <div class="text-[10px] font-mono text-blades-muted mt-1">Getting started</div>
       </a>
@@ -53,7 +58,11 @@
         <p class="text-blades-text font-sans text-sm leading-relaxed">
           Aurelion itself was the Demon King's capital. The victorious hero party stayed, argued, split
           along old political lines, and failed to build a stable peace. Each founded an institution instead:
-          a Church, a Mage College, a law enforcement force, a trade guild, a transport authority.
+          a <RouterLink to="/factions" class="text-blades-gold hover:underline">Church</RouterLink>,
+          a <RouterLink to="/factions" class="text-blades-gold hover:underline">Mage College</RouterLink>,
+          a <RouterLink to="/factions" class="text-blades-gold hover:underline">law enforcement force</RouterLink>,
+          a <RouterLink to="/factions" class="text-blades-gold hover:underline">trade guild</RouterLink>,
+          a <RouterLink to="/factions" class="text-blades-gold hover:underline">transport authority</RouterLink>.
           <span class="text-blades-muted italic">Their statues are everywhere. Their institutions are the law.</span>
         </p>
         <div class="blades-card p-4 border-blades-gold/20 bg-blades-gold/5">
@@ -93,14 +102,10 @@
             </div>
           </div>
           <div class="space-y-1.5 text-xs font-mono text-blades-muted">
-            <div><span class="text-blades-text">Crownrise</span> — Power performed. Ceremonial parades,
-              monuments to the Heroes, proclamations. Legitimacy as theater.</div>
-            <div><span class="text-blades-text">High Sanctum</span> — The Cleric's Church. Faith, charity,
-              and the Order of the Pale Seal — the city's sanctioned demon-hunters.</div>
-            <div><span class="text-blades-text">Stonefall</span> — Old noble families rotting in their
-              estates. The sealed prison. Titles that mean less each decade.</div>
-            <div><span class="text-blades-text">Archivum</span> — Paper power. Controls who legally exists
-              in Aurelion. Can unmake a person with a single ledger correction.</div>
+            <div><RouterLink to="/locations" class="text-blades-text hover:text-blades-gold transition-colors">Crownrise</RouterLink> — Power performed. Ceremonial parades, monuments to the Heroes, proclamations. Legitimacy as theater.</div>
+            <div><RouterLink to="/locations" class="text-blades-text hover:text-blades-gold transition-colors">High Sanctum</RouterLink> — The Cleric's Church. Faith, charity, and the <RouterLink to="/npcs" class="text-blades-sage-light hover:text-blades-gold transition-colors">Order of the Pale Seal</RouterLink> — the city's sanctioned demon-hunters.</div>
+            <div><RouterLink to="/locations" class="text-blades-text hover:text-blades-gold transition-colors">Stonefall</RouterLink> — Old noble families rotting in their estates. The sealed prison. Titles that mean less each decade.</div>
+            <div><RouterLink to="/locations" class="text-blades-text hover:text-blades-gold transition-colors">Archivum</RouterLink> — Paper power. Controls who legally exists in Aurelion. Can unmake a person with a single ledger correction.</div>
           </div>
         </div>
 
@@ -114,14 +119,10 @@
             </div>
           </div>
           <div class="space-y-1.5 text-xs font-mono text-blades-muted">
-            <div><span class="text-blades-text">Wardspire</span> — Courts, Bluecoat HQ, central prison.
-              Law made concrete. Presence thins significantly below Mid City.</div>
-            <div><span class="text-blades-text">Runeward</span> — The Mage's institution. Licensed magic,
-              ward maintenance, inspections. Unlicensed casting is a serious crime.</div>
-            <div><span class="text-blades-text">Ironline</span> — Rail hub. The only safe transit between
-              the three surviving cities. Controls who leaves and who returns.</div>
-            <div><span class="text-blades-text">Guildreach</span> — Industry and labor. Guilds set wages,
-              hours, and permitted trades. Organized — and exploited.</div>
+            <div><RouterLink to="/locations" class="text-blades-text hover:text-blades-gold transition-colors">Wardspire</RouterLink> — Courts, Bluecoat HQ, central prison. Law made concrete. Presence thins significantly below Mid City.</div>
+            <div><RouterLink to="/locations" class="text-blades-text hover:text-blades-gold transition-colors">Runeward</RouterLink> — The Mage's institution. Licensed magic, ward maintenance, inspections. Unlicensed casting is a serious crime.</div>
+            <div><RouterLink to="/locations" class="text-blades-text hover:text-blades-gold transition-colors">Ironline</RouterLink> — Rail hub. The only safe transit between the three surviving cities. Controls who leaves and who returns.</div>
+            <div><RouterLink to="/locations" class="text-blades-text hover:text-blades-gold transition-colors">Guildreach</RouterLink> — Industry and labor. Guilds set wages, hours, and permitted trades. Organized — and exploited.</div>
           </div>
         </div>
 
@@ -135,16 +136,11 @@
             </div>
           </div>
           <div class="space-y-1.5 text-xs font-mono text-blades-muted">
-            <div><span class="text-blades-text">Low Lanterns</span> — Pleasure, debt, and shadow brokerage.
-              What happens above stays above; what happens here stays dark.</div>
-            <div><span class="text-blades-text">Night Market</span> — Everything illegal or just
-              extralegal, sold openly after dark. Fences, forgers, alchemists.</div>
-            <div><span class="text-blades-text">The Stacks</span> — Displaced workers, radical politics,
-              and organizers who dream of burning Guildreach to the ground.</div>
-            <div><span class="text-blades-text">Drownways</span> — Flooded canals, smuggling channels,
-              and old Demon-King infrastructure no one has mapped completely.</div>
-            <div><span class="text-blades-text">Ashfall</span> — Contaminated ruins. People who have
-              nowhere else to go. Strange mutations. Unofficial containment zone.</div>
+            <div><RouterLink to="/locations" class="text-blades-text hover:text-blades-gold transition-colors">Low Lanterns</RouterLink> — Pleasure, debt, and shadow brokerage. What happens above stays above; what happens here stays dark.</div>
+            <div><RouterLink to="/locations" class="text-blades-text hover:text-blades-gold transition-colors">Night Market</RouterLink> — Everything illegal or just extralegal, sold openly after dark. Fences, forgers, alchemists.</div>
+            <div><RouterLink to="/locations" class="text-blades-text hover:text-blades-gold transition-colors">The Stacks</RouterLink> — Displaced workers, radical politics, and organizers who dream of burning Guildreach to the ground.</div>
+            <div><RouterLink to="/locations" class="text-blades-text hover:text-blades-gold transition-colors">Drownways</RouterLink> — Flooded canals, smuggling channels, and old Demon-King infrastructure no one has mapped completely.</div>
+            <div><RouterLink to="/locations" class="text-blades-text hover:text-blades-gold transition-colors">Ashfall</RouterLink> — Contaminated ruins. People who have nowhere else to go. Strange mutations. Unofficial containment zone.</div>
           </div>
         </div>
 
@@ -158,15 +154,116 @@
             </div>
           </div>
           <div class="space-y-1.5 text-xs font-mono text-blades-muted">
-            <div><span class="text-blades-text">Old Nexus</span> — The buried heart of the Demon King's
-              power. Ancient, partially sealed, never truly resolved. Those who go below
-              often do not return the same.</div>
+            <div><RouterLink to="/locations" class="text-blades-text hover:text-blades-gold transition-colors">Old Nexus</RouterLink> — The buried heart of the Demon King's power. Ancient, partially sealed, never truly resolved. Those who go below often do not return the same.</div>
             <div class="text-blades-occult-light/60 italic text-[10px]">
               The city's official position: Old Nexus is contained. The city's unofficial reality:
               no one is entirely sure.
             </div>
           </div>
         </div>
+      </div>
+    </section>
+
+    <!-- ── NOTABLE FIGURES ───────────────────────────────────────────────────── -->
+    <section id="notable-figures" class="scroll-mt-6 space-y-5">
+      <div class="section-header"><h2>Key People</h2></div>
+
+      <p class="text-blades-muted font-mono text-xs leading-relaxed">
+        Aurelion is run by institutions, but institutions have faces.
+        These are the heads, commanders, and power brokers your crew is most likely to deal with.
+        Full profiles — including action ratings, notes, and faction ties — are in the
+        <RouterLink to="/npcs" class="text-blades-gold hover:underline">NPCs section</RouterLink>.
+      </p>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+        <RouterLink to="/npcs" class="blades-card p-4 hover:border-blades-gold/30 transition-colors block">
+          <div class="flex items-start gap-3">
+            <div class="text-lg flex-shrink-0 mt-0.5">⛪</div>
+            <div>
+              <div class="text-xs font-mono text-blades-muted mb-0.5">High Sanctum · Church</div>
+              <div class="text-blades-text font-serif font-semibold text-sm">Mother Serafine</div>
+              <div class="text-blades-muted font-mono text-[10px] leading-relaxed mt-1">High Cleric. Immense spiritual authority, quiet political acuity. Knows the blight is worse than the reports say.</div>
+            </div>
+          </div>
+        </RouterLink>
+
+        <RouterLink to="/npcs" class="blades-card p-4 hover:border-blades-gold/30 transition-colors block">
+          <div class="flex items-start gap-3">
+            <div class="text-lg flex-shrink-0 mt-0.5">🗡</div>
+            <div>
+              <div class="text-xs font-mono text-blades-muted mb-0.5">Order of the Pale Seal</div>
+              <div class="text-blades-text font-serif font-semibold text-sm">Captain Edith Vaan</div>
+              <div class="text-blades-muted font-mono text-[10px] leading-relaxed mt-1">Head of the demon-hunters. Relentlessly pragmatic. Will work with criminals if it means containing the blight.</div>
+            </div>
+          </div>
+        </RouterLink>
+
+        <RouterLink to="/npcs" class="blades-card p-4 hover:border-blades-gold/30 transition-colors block">
+          <div class="flex items-start gap-3">
+            <div class="text-lg flex-shrink-0 mt-0.5">⚖</div>
+            <div>
+              <div class="text-xs font-mono text-blades-muted mb-0.5">Wardspire · Bluecoats</div>
+              <div class="text-blades-text font-serif font-semibold text-sm">Prefect Alden Crane</div>
+              <div class="text-blades-muted font-mono text-[10px] leading-relaxed mt-1">Head of law enforcement. Meticulous, unbribeable, and furious that his authority vanishes below Mid City.</div>
+            </div>
+          </div>
+        </RouterLink>
+
+        <RouterLink to="/npcs" class="blades-card p-4 hover:border-blades-gold/30 transition-colors block">
+          <div class="flex items-start gap-3">
+            <div class="text-lg flex-shrink-0 mt-0.5">✦</div>
+            <div>
+              <div class="text-xs font-mono text-blades-muted mb-0.5">Runeward · Magic Authority</div>
+              <div class="text-blades-text font-serif font-semibold text-sm">Archmage Thessaly Corrin</div>
+              <div class="text-blades-muted font-mono text-[10px] leading-relaxed mt-1">Head of licensed magic. Brilliant, visibly anxious — she knows how close the ward network is to failure.</div>
+            </div>
+          </div>
+        </RouterLink>
+
+        <RouterLink to="/npcs" class="blades-card p-4 hover:border-blades-gold/30 transition-colors block">
+          <div class="flex items-start gap-3">
+            <div class="text-lg flex-shrink-0 mt-0.5">📜</div>
+            <div>
+              <div class="text-xs font-mono text-blades-muted mb-0.5">The Archivum · Records</div>
+              <div class="text-blades-text font-serif font-semibold text-sm">Archivist-General Voss</div>
+              <div class="text-blades-muted font-mono text-[10px] leading-relaxed mt-1">Controls all legal identity. Can erase a person with a ledger correction. Has done it three times.</div>
+            </div>
+          </div>
+        </RouterLink>
+
+        <RouterLink to="/npcs" class="blades-card p-4 hover:border-blades-gold/30 transition-colors block">
+          <div class="flex items-start gap-3">
+            <div class="text-lg flex-shrink-0 mt-0.5">🏮</div>
+            <div>
+              <div class="text-xs font-mono text-blades-muted mb-0.5">Night Market · Underworld</div>
+              <div class="text-blades-text font-serif font-semibold text-sm">Mama Rue</div>
+              <div class="text-blades-muted font-mono text-[10px] leading-relaxed mt-1">Elder of the Night Market. Everyone's grandmother and nobody's fool. Approach with respect and a small gift.</div>
+            </div>
+          </div>
+        </RouterLink>
+
+        <RouterLink to="/npcs" class="blades-card p-4 hover:border-blades-gold/30 transition-colors block">
+          <div class="flex items-start gap-3">
+            <div class="text-lg flex-shrink-0 mt-0.5">💀</div>
+            <div>
+              <div class="text-xs font-mono text-blades-muted mb-0.5">Old Nexus · Unknown</div>
+              <div class="text-blades-text font-serif font-semibold text-sm">The Dreamer</div>
+              <div class="text-blades-muted font-mono text-[10px] leading-relaxed mt-1">Not quite a person. Sends visions from below the wards. What it wants is unclear. What it knows is dangerous.</div>
+            </div>
+          </div>
+        </RouterLink>
+
+        <RouterLink to="/npcs" class="blades-card p-4 hover:border-blades-gold/40 transition-colors block border-dashed">
+          <div class="flex items-center gap-3 h-full">
+            <div class="text-lg flex-shrink-0">◈</div>
+            <div>
+              <div class="text-blades-gold font-serif text-sm">7 more in the NPCs section →</div>
+              <div class="text-blades-muted font-mono text-[10px] mt-1">Guildmaster Holt, Director Cale, The Collector, Silent Henn, Inspector Solt, Ela Stirn, Lord Fell</div>
+            </div>
+          </div>
+        </RouterLink>
+
       </div>
     </section>
 
@@ -359,6 +456,18 @@
           </div>
         </div>
 
+        <div class="blades-card p-5 flex gap-4">
+          <div class="text-2xl flex-shrink-0 mt-0.5">✎</div>
+          <div>
+            <div class="text-blades-text font-serif font-semibold mb-1">Journal</div>
+            <p class="text-blades-muted font-mono text-xs leading-relaxed">
+              Record session notes, discoveries, and consequences. Each entry can link directly to
+              NPCs, Locations, and Factions involved in the session. Tag entries for easy searching.
+              Toggle 🌐 Public to include session logs on your campaign site for players to read.
+            </p>
+          </div>
+        </div>
+
         <div v-if="!isStatic" class="blades-card p-5 flex gap-4 border-blades-gold/20">
           <div class="text-2xl flex-shrink-0 mt-0.5">↑</div>
           <div>
@@ -386,6 +495,7 @@
 </template>
 
 <script setup lang="ts">
+import { RouterLink } from 'vue-router'
 declare const __STATIC_MODE__: boolean
 const isStatic = __STATIC_MODE__
 </script>

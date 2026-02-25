@@ -321,3 +321,19 @@ export interface Score {
   createdAt: string
   updatedAt: string
 }
+
+// ── Journal ────────────────────────────────────────────────────────────────────
+
+export interface JournalEntry {
+  id: string
+  title: string
+  sessionNumber?: number
+  content: string        // free-form text / markdown
+  tags?: string[]
+  linkedNpcIds?: string[]
+  linkedLocationIds?: string[]
+  linkedFactionIds?: string[]
+  isPublic?: boolean
+  createdAt: string
+  updatedAt: string
+}
