@@ -18,6 +18,29 @@
             <div class="text-blades-text">3. Run the deploy command — your GitHub Pages site shows everything</div>
           </div>
 
+          <!-- Live size preview -->
+          <div class="border rounded-sm p-3 text-xs font-mono space-y-2"
+               :class="sizeWarning ? 'border-amber-700/50 bg-amber-900/10' : 'border-blades-border bg-blades-bg'">
+            <div class="flex items-center justify-between">
+              <span class="text-blades-muted">Export size</span>
+              <span :class="sizeWarning ? 'text-amber-400' : 'text-blades-gold'" class="font-semibold">
+                {{ exportSizeMb }} MB
+              </span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-blades-muted">Images included</span>
+              <span class="text-blades-text">{{ imageCount }}</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-blades-muted">Public entities</span>
+              <span class="text-blades-text">{{ publicEntityCount }}</span>
+            </div>
+            <div v-if="sizeWarning" class="text-amber-400/80 leading-relaxed pt-1 border-t border-amber-700/30">
+              ⚠ File is large. Players may see a slow first load.
+              Consider clearing unused images if this grows beyond 10 MB.
+            </div>
+          </div>
+
           <div>
             <label class="blades-label">Your GitHub Pages URL (optional)</label>
             <input v-model="baseUrl" class="blades-input" placeholder="https://yourname.github.io/ttdb/" />
@@ -50,7 +73,10 @@
               Move it into your project at:
             </div>
             <div class="text-blades-gold bg-blades-bg px-3 py-1.5 rounded-sm">public/campaign-data.json</div>
-            <div class="text-blades-muted">This file contains all your public content — NPCs, locations, images — everything.</div>
+            <div class="text-blades-muted">
+              This file contains all your public content — NPCs, locations, images — everything.
+              <span class="text-blades-text">({{ exportSizeMb }} MB, {{ imageCount }} image{{ imageCount !== 1 ? 's' : '' }})</span>
+            </div>
           </div>
 
           <!-- Step 2: commit + deploy -->
@@ -88,7 +114,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useCharactersStore } from '@/stores/characters'
 import { useLocationsStore } from '@/stores/locations'
 import { useFactionsStore } from '@/stores/factions'
@@ -107,6 +133,44 @@ const facStore = useFactionsStore()
 const itemStore = useItemsStore()
 const crewStore = useCrewStore()
 const journalStore = useJournalStore()
+
+// ── Pre-export stats ────────────────────────────────────────────────────────
+
+const publicChars  = computed(() => charStore.exportSnapshot().filter(c => c.isPublic !== false))
+const publicLocs   = computed(() => locStore.exportSnapshot().filter(l => l.isPublic !== false))
+const publicItems  = computed(() => itemStore.exportSnapshot().filter(i => i.isPublic !== false))
+const publicJournal = computed(() => journalStore.exportSnapshot().filter(e => e.isPublic !== false))
+
+const publicEntityCount = computed(() =>
+  publicChars.value.length + publicLocs.value.length +
+  publicItems.value.length + facStore.exportSnapshot().length
+)
+
+const imageCount = computed(() => {
+  const hasImage = (o: { bannerImage?: string } | null | undefined) => !!(o?.bannerImage)
+  const crew = crewStore.exportSnapshot() as { bannerImage?: string } | null
+  return (
+    publicChars.value.filter(hasImage).length +
+    publicLocs.value.filter(hasImage).length +
+    facStore.exportSnapshot().filter(hasImage).length +
+    (hasImage(crew) ? 1 : 0)
+  )
+})
+
+const exportSizeBytes = computed(() => {
+  const data = {
+    characters: publicChars.value,
+    locations:  publicLocs.value,
+    factions:   facStore.exportSnapshot(),
+    items:      publicItems.value,
+    crew:       crewStore.exportSnapshot(),
+    journal:    publicJournal.value,
+  }
+  return new TextEncoder().encode(JSON.stringify(data)).length
+})
+
+const exportSizeMb = computed(() => (exportSizeBytes.value / 1_048_576).toFixed(2))
+const sizeWarning  = computed(() => exportSizeBytes.value > 5 * 1_048_576)
 
 function downloadCampaignData() {
   const data = {
