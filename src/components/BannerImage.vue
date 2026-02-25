@@ -172,9 +172,11 @@ function makePollinationsUrl(encoded: string, seed: number) {
   return `https://image.pollinations.ai/prompt/${encoded}?${dims}&nologo=true&seed=${seed}&model=flux`
 }
 
-async function generateWithPollinations(encoded: string): Promise<string> {
+function generateWithPollinations(encoded: string): string {
+  // Pollinations URLs are deterministic/permanent — no need to download as base64.
+  // Storing the URL keeps the JSON tiny and the <img> loads it on demand.
   const seed = Math.floor(Math.random() * 99_999)
-  return fetchAsDataUrl(makePollinationsUrl(encoded, seed))
+  return makePollinationsUrl(encoded, seed)
 }
 
 // ── Main generate function ────────────────────────────────────────────────────
@@ -204,13 +206,14 @@ async function generateImage() {
   for (let attempt = 0; attempt < 2; attempt++) {
     if (attempt === 1) retrying.value = true
     try {
-      let dataUrl: string
+      let imageValue: string
       if (openaiKey) {
-        dataUrl = await generateWithOpenAI(fullPrompt, openaiKey)
+        imageValue = await generateWithOpenAI(fullPrompt, openaiKey)
       } else {
-        dataUrl = await generateWithPollinations(encodeURIComponent(fullPrompt))
+        // Pollinations: URL is stable, emit it directly without downloading
+        imageValue = generateWithPollinations(encodeURIComponent(fullPrompt))
       }
-      emit('update:modelValue', dataUrl)
+      emit('update:modelValue', imageValue)
       generating.value = false
       retrying.value = false
       generatingPrompt.value = ''

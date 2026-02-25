@@ -11,13 +11,6 @@
 
       <template v-if="status === 'idle'">
         <div class="space-y-4">
-          <div class="bg-blades-bg border border-blades-border p-4 text-xs font-mono space-y-1.5">
-            <div class="text-blades-muted">This will:</div>
-            <div class="text-blades-text">1. <span class="text-blades-gold">Download your campaign data</span> (images &amp; all public content)</div>
-            <div class="text-blades-text">2. You place it at <span class="text-blades-gold">public/campaign-data.json</span> in your repo</div>
-            <div class="text-blades-text">3. Run the deploy command — your GitHub Pages site shows everything</div>
-          </div>
-
           <!-- Live size preview -->
           <div class="border rounded-sm p-3 text-xs font-mono space-y-2"
                :class="sizeWarning ? 'border-amber-700/50 bg-amber-900/10' : 'border-blades-border bg-blades-bg'">
@@ -37,7 +30,6 @@
             </div>
             <div v-if="sizeWarning" class="text-amber-400/80 leading-relaxed pt-1 border-t border-amber-700/30">
               ⚠ File is large. Players may see a slow first load.
-              Consider clearing unused images if this grows beyond 10 MB.
             </div>
           </div>
 
@@ -54,44 +46,44 @@
             <div>· Node.js + npm installed locally</div>
           </div>
 
+          <div v-if="saveError" class="text-red-400 font-mono text-xs px-1">{{ saveError }}</div>
+
           <div class="flex gap-2">
-            <button class="blades-btn-gold flex-1" @click="startDeploy">↑ Deploy Now</button>
+            <button class="blades-btn-gold flex-1" @click="startDeploy">
+              ↑ Save campaign-data.json
+            </button>
             <button class="blades-btn-ghost" @click="$emit('close')">Cancel</button>
+          </div>
+          <div class="text-[10px] text-blades-muted font-mono text-center -mt-2">
+            A save dialog will open — navigate to your project's
+            <span class="text-blades-gold">public/</span> folder
           </div>
         </div>
       </template>
 
-      <template v-else-if="status === 'deploying'">
+      <template v-else-if="status === 'saved'">
         <div class="py-2 space-y-4">
-          <!-- Step 1: data file downloaded -->
-          <div class="border border-blades-gold/30 bg-blades-gold/5 p-4 space-y-2 text-xs font-mono">
-            <div class="text-blades-gold font-semibold flex items-center gap-2">
-              <span>✓</span> Step 1 — Data exported
-            </div>
-            <div class="text-blades-muted leading-relaxed">
-              <span class="text-blades-text">campaign-data.json</span> was downloaded to your Downloads folder.
-              Move it into your project at:
-            </div>
-            <div class="text-blades-gold bg-blades-bg px-3 py-1.5 rounded-sm">public/campaign-data.json</div>
+          <div class="border border-blades-gold/30 bg-blades-gold/5 p-4 space-y-1 text-xs font-mono">
+            <div class="text-blades-gold font-semibold">✓ campaign-data.json saved</div>
             <div class="text-blades-muted">
-              This file contains all your public content — NPCs, locations, images — everything.
-              <span class="text-blades-text">({{ exportSizeMb }} MB, {{ imageCount }} image{{ imageCount !== 1 ? 's' : '' }})</span>
+              {{ exportSizeMb }} MB · {{ imageCount }} image{{ imageCount !== 1 ? 's' : '' }}
+              · {{ publicEntityCount }} entities
             </div>
           </div>
 
-          <!-- Step 2: commit + deploy -->
           <div class="border border-blades-border p-4 space-y-2 text-xs font-mono">
-            <div class="text-blades-text font-semibold">Step 2 — Commit &amp; deploy</div>
-            <div class="text-blades-muted">In your terminal, from the project folder:</div>
-            <div class="bg-blades-bg px-3 py-2 space-y-1 rounded-sm">
-              <div class="text-blades-gold">git add public/campaign-data.json</div>
-              <div class="text-blades-gold">git commit -m "Update campaign data"</div>
-              <div class="text-blades-gold">npm run build:static &amp;&amp; npm run deploy</div>
+            <div class="text-blades-text font-semibold">Now run this in your project folder:</div>
+            <div class="bg-blades-bg px-3 py-2 rounded-sm flex items-start justify-between gap-2">
+              <div class="text-blades-gold leading-relaxed break-all">{{ deployCommand }}</div>
+              <button
+                class="blades-btn-ghost text-[10px] shrink-0 py-0.5 px-2"
+                @click="copyCommand"
+              >{{ copied ? '✓' : 'Copy' }}</button>
             </div>
           </div>
 
           <div class="flex gap-2">
-            <button class="blades-btn-ghost text-xs" @click="redownload">↓ Re-download data</button>
+            <button class="blades-btn-ghost text-xs" @click="startDeploy">↓ Re-save data</button>
             <button class="blades-btn-gold text-xs flex-1" @click="status = 'done'">Mark as Done</button>
           </div>
         </div>
@@ -124,8 +116,10 @@ import { useJournalStore } from '@/stores/journal'
 
 defineEmits<{ close: [] }>()
 
-const status = ref<'idle' | 'deploying' | 'done'>('idle')
+const status = ref<'idle' | 'saved' | 'done'>('idle')
 const baseUrl = ref('')
+const saveError = ref('')
+const copied = ref(false)
 
 const charStore = useCharactersStore()
 const locStore = useLocationsStore()
@@ -136,9 +130,9 @@ const journalStore = useJournalStore()
 
 // ── Pre-export stats ────────────────────────────────────────────────────────
 
-const publicChars  = computed(() => charStore.exportSnapshot().filter(c => c.isPublic !== false))
-const publicLocs   = computed(() => locStore.exportSnapshot().filter(l => l.isPublic !== false))
-const publicItems  = computed(() => itemStore.exportSnapshot().filter(i => i.isPublic !== false))
+const publicChars   = computed(() => charStore.exportSnapshot().filter(c => c.isPublic !== false))
+const publicLocs    = computed(() => locStore.exportSnapshot().filter(l => l.isPublic !== false))
+const publicItems   = computed(() => itemStore.exportSnapshot().filter(i => i.isPublic !== false))
 const publicJournal = computed(() => journalStore.exportSnapshot().filter(e => e.isPublic !== false))
 
 const publicEntityCount = computed(() =>
@@ -172,34 +166,72 @@ const exportSizeBytes = computed(() => {
 const exportSizeMb = computed(() => (exportSizeBytes.value / 1_048_576).toFixed(2))
 const sizeWarning  = computed(() => exportSizeBytes.value > 5 * 1_048_576)
 
-function downloadCampaignData() {
-  const data = {
+const deployCommand = computed(() =>
+  'git add public/campaign-data.json && git commit -m "Update campaign data" && npm run build:static && npm run deploy'
+)
+
+// ── Data builder ─────────────────────────────────────────────────────────────
+
+function buildExportData() {
+  return {
     _readme: 'Generated by TTDB — place this file at public/campaign-data.json in your repo, commit, and push.',
     version: 2,
     game: 'blades-in-the-dark',
     exportedAt: new Date().toISOString(),
-    characters: charStore.exportSnapshot().filter(c => c.isPublic !== false),
-    locations:  locStore.exportSnapshot().filter(l => l.isPublic !== false),
+    characters: publicChars.value,
+    locations:  publicLocs.value,
     factions:   facStore.exportSnapshot(),
-    items:      itemStore.exportSnapshot().filter(i => i.isPublic !== false),
+    items:      publicItems.value,
     crew:       crewStore.exportSnapshot(),
-    journal:    journalStore.exportSnapshot().filter(e => e.isPublic !== false),
+    journal:    publicJournal.value,
   }
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+}
+
+// ── Save via File System Access API (with download fallback) ─────────────────
+
+async function startDeploy() {
+  saveError.value = ''
+  const json = JSON.stringify(buildExportData(), null, 2)
+
+  // Modern browsers: let user pick exactly where to save the file
+  if ('showSaveFilePicker' in window) {
+    try {
+      const handle = await (window as any).showSaveFilePicker({
+        suggestedName: 'campaign-data.json',
+        types: [{ description: 'JSON', accept: { 'application/json': ['.json'] } }],
+      })
+      const writable = await handle.createWritable()
+      await writable.write(json)
+      await writable.close()
+      status.value = 'saved'
+    } catch (err: any) {
+      // User cancelled — don't show an error
+      if (err?.name !== 'AbortError') {
+        saveError.value = 'Save failed. Try again or use the download fallback below.'
+        console.error(err)
+      }
+    }
+    return
+  }
+
+  // Fallback: trigger a browser download
+  const blob = new Blob([json], { type: 'application/json' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
   a.download = 'campaign-data.json'
   a.click()
   URL.revokeObjectURL(url)
+  status.value = 'saved'
 }
 
-function startDeploy() {
-  downloadCampaignData()
-  status.value = 'deploying'
-}
-
-function redownload() {
-  downloadCampaignData()
+async function copyCommand() {
+  try {
+    await navigator.clipboard.writeText(deployCommand.value)
+    copied.value = true
+    setTimeout(() => { copied.value = false }, 2000)
+  } catch {
+    // clipboard not available — silently ignore
+  }
 }
 </script>
