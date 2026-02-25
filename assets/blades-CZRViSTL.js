@@ -1,0 +1,1 @@
+const i={insight:["hunt","study","survey","tinker"],prowess:["finesse","prowl","skirmish","wreck"],resolve:["attune","command","consort","sway"]},t=["region","city","district","site"],s={region:"Region",city:"City",district:"District",site:"Site / Building"},e={region:"city",city:"district",district:"site",site:null};export{i as A,s as L,t as a,e as b};
