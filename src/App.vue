@@ -39,6 +39,9 @@
         <RouterLink to="/characters" class="nav-link" :class="{ active: route.path.startsWith('/characters') }">
           <span class="nav-icon">◉</span> Player Characters
         </RouterLink>
+        <RouterLink to="/jobs" class="nav-link" :class="{ active: route.path === '/jobs' }">
+          <span class="nav-icon">◆</span> Jobs
+        </RouterLink>
 
         <!-- The World -->
         <NavSection label="The World" class="mt-3" />
@@ -94,6 +97,7 @@ import { useItemsStore } from '@/stores/items'
 import { useCrewStore } from '@/stores/crew'
 import { useSettingsStore } from '@/stores/settings'
 import { useJournalStore } from '@/stores/journal'
+import { useJobsStore } from '@/stores/jobs'
 import DeployModal from '@/components/DeployModal.vue'
 import NavSection from '@/components/NavSection.vue'
 
@@ -112,5 +116,6 @@ onMounted(() => {
   useItemsStore().load()
   useCrewStore().load()
   useJournalStore().load()
+  useJobsStore().load()
 })
 </script>

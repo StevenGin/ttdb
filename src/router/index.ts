@@ -12,6 +12,7 @@ const routes = [
   { path: '/factions', component: () => import('@/views/FactionsView.vue') },
   { path: '/items', component: () => import('@/views/ItemsView.vue') },
   { path: '/crew', component: () => import('@/views/CrewView.vue') },
+  { path: '/jobs', component: () => import('@/views/JobsView.vue') },
   { path: '/journal', component: () => import('@/views/JournalView.vue') },
   ...(__STATIC_MODE__
     ? []

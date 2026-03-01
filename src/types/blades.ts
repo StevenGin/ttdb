@@ -302,12 +302,32 @@ export interface Clock {
   notes?: string
 }
 
+export const SCORE_TYPES = [
+  'assassination', 'heist', 'occult', 'ransom', 'sabotage', 'smuggling', 'sway', 'theft',
+] as const
+
+export const SCORE_TYPE_ICONS: Record<string, string> = {
+  assassination: '✦',
+  heist:         '◇',
+  occult:        '⊕',
+  ransom:        '⚓',
+  sabotage:      '⚙',
+  smuggling:     '◈',
+  sway:          '◉',
+  theft:         '◆',
+}
+
+export const PLAN_TYPES = [
+  'Assault', 'Deception', 'Occult', 'Social', 'Stealth', 'Transport',
+] as const
+
 export interface Score {
   id: string
   name: string
-  type: string          // 'assassination' | 'heist' | 'occult' | 'ransom' | 'sabotage' | 'smuggling' | 'sway' | 'theft'
+  type: string          // one of SCORE_TYPES
   targetFactionId?: string
   locationId?: string
+  contactIds?: string[] // NPC/character IDs
   description?: string
   plan?: string
   detail?: string
