@@ -187,6 +187,12 @@
               <div class="border-b border-blades-gold/20 mt-3" />
             </div>
 
+            <!-- Location banner -->
+            <div v-if="currentLocation?.bannerImage" class="-mx-5 -mt-4">
+              <img :src="currentLocation.bannerImage" :alt="currentLocation.name"
+                   class="w-full object-cover max-h-40 opacity-80" />
+            </div>
+
             <!-- Target -->
             <div v-if="currentFaction || currentLocation" class="space-y-2">
               <div class="brief-label">Target</div>
